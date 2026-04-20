@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥤 Galaxy Cola Clicker | Anti-AutoClicker & Prestige</title>
+    <title>🥤 REBIRTH COLA | Ascend & Evolve</title>
     <style>
         * {
             user-select: none;
@@ -20,11 +20,10 @@
             transition: background 0.4s ease;
         }
 
-        /* Prestige cosmic themes */
-        body.prestige-0 { background: radial-gradient(circle at 30% 20%, #1a1a2e, #0a0a1a); }
-        body.prestige-1 { background: radial-gradient(circle at 70% 40%, #2a1a3e, #0e0a1f); box-shadow: inset 0 0 100px rgba(156, 80, 255, 0.2); }
-        body.prestige-2 { background: radial-gradient(circle at 20% 80%, #0a2a3a, #021018); box-shadow: inset 0 0 120px rgba(0, 200, 255, 0.2); }
-        body.prestige-3 { background: radial-gradient(circle at 50% 50%, #2a2a0a, #1a1a02); box-shadow: inset 0 0 150px rgba(255, 215, 0, 0.3); }
+        /* Clean dark theme - background stays dark, cola changes */
+        body {
+            background: radial-gradient(circle at 30% 20%, #0f1722, #03050b);
+        }
 
         /* HUD */
         #hud {
@@ -54,22 +53,6 @@
             z-index: 100;
             border-right: 4px solid #ffaa44;
         }
-        #streakBox {
-            position: fixed;
-            top: 85px;
-            left: 20px;
-            background: rgba(0,0,0,0.85);
-            backdrop-filter: blur(8px);
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            font-size: 1rem;
-            color: #ffdd99;
-            border-left: 3px solid #ffaa33;
-            font-family: monospace;
-            z-index: 100;
-        }
-        #streakPercent { font-size: 1.2rem; color: #ffcc55; font-weight: bold; }
         #prestigeBadge {
             position: fixed;
             top: 85px;
@@ -95,7 +78,7 @@
             z-index: 200;
         }
         .menu-btn {
-            background: #2c2118dd;
+            background: #1e293bdd;
             backdrop-filter: blur(8px);
             border: 1px solid #ffaa6644;
             padding: 10px 26px;
@@ -115,13 +98,18 @@
             height: 100vh;
             flex-direction: column;
         }
+        /* NEW COLA ICON - modern sleek bottle */
         #cola {
-            font-size: 210px;
+            font-size: 200px;
             cursor: pointer;
-            filter: drop-shadow(0 0 25px rgba(255,100,30,0.8));
+            filter: drop-shadow(0 0 25px rgba(255,100,30,0.6));
             transition: transform 0.07s cubic-bezier(0.2, 1.2, 0.8, 1);
+            background: none;
+            display: inline-block;
         }
         #cola:active { transform: scale(0.92); }
+        
+        /* Panel styles */
         .panel {
             position: fixed;
             top: 50%;
@@ -129,7 +117,7 @@
             transform: translate(-50%, -50%);
             width: 350px;
             max-width: 88vw;
-            background: #1e1712ea;
+            background: #0f1722ea;
             backdrop-filter: blur(20px);
             border-radius: 38px;
             padding: 20px 18px;
@@ -153,10 +141,11 @@
             transition: 0.07s linear;
         }
         .panel button:active { transform: scale(0.97); background: #5e3e2a; }
+        .panel button:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
         .close-panel { background: #7a3a28 !important; margin-top: 8px; }
         hr { border-color: #ffb34760; margin: 8px 0; }
         .prestige-card {
-            background: #2a1f1ad9;
+            background: #1e293b;
             border-left: 5px solid #ffb347;
             padding: 12px 12px;
             border-radius: 28px;
@@ -170,26 +159,19 @@
             text-shadow: 0 0 8px #ff8800;
             animation: floatPop 1s forwards;
             pointer-events: none;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             z-index: 1000;
         }
         @keyframes floatPop {
-            0% { opacity: 1; transform: translateY(0) scale(0.8);}
-            100% { opacity: 0; transform: translateY(-130px) scale(1.5);}
-        }
-        .streak-flash {
-            animation: pulseGold 0.2s ease-out;
-        }
-        @keyframes pulseGold {
-            0% { text-shadow: 0 0 0px gold; background: rgba(255,200,0,0);}
-            100% { text-shadow: 0 0 18px #ffcc44; background: rgba(255,200,0,0.2);}
+            0% { opacity: 1; transform: translateY(0) scale(0.7);}
+            100% { opacity: 0; transform: translateY(-140px) scale(1.3);}
         }
         .click-effect {
             animation: colaPop 0.1s ease-out;
         }
         @keyframes colaPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.08); }
+            0% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255,100,30,0.8));}
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 40px #ffaa44);}
             100% { transform: scale(1); }
         }
         .warning-popup {
@@ -213,21 +195,27 @@
             100% { opacity: 0; bottom: 80px; visibility: hidden; }
         }
         .locked-notice { font-size: 0.8rem; color: #ffaa88; text-align: center; }
+        
+        /* rebirth animation */
+        @keyframes rebirthGlow {
+            0% { filter: drop-shadow(0 0 0px gold); transform: scale(1);}
+            50% { filter: drop-shadow(0 0 50px #ffcc44); transform: scale(1.2);}
+            100% { filter: drop-shadow(0 0 20px rgba(255,100,30,0.6)); transform: scale(1);}
+        }
+        .rebirth-flash {
+            animation: rebirthGlow 0.8s ease-out;
+        }
     </style>
 </head>
-<body class="prestige-0">
+<body>
 
 <div id="hud">🥤 COLA: <span id="colaCount">0</span></div>
 <div id="totalDisplay">📈 TOTAL: <span id="allTime">0</span></div>
-<div id="streakBox">
-    🔥 STREAK: <span id="streakValue">0</span> / 100 &nbsp;| 
-    ✨ BONUS: +<span id="streakPercent">0</span>%
-</div>
-<div id="prestigeBadge">🏆 PRESTIGE <span id="prestigeLevel">0</span> &nbsp;| 💪 BONUS +<span id="prestigeBonus">0</span>%</div>
+<div id="prestigeBadge">🌀 REBIRTH <span id="prestigeLevel">0</span> &nbsp;| 💪 BONUS +<span id="prestigeBonus">0</span>%</div>
 
 <div class="menu-bar">
     <button class="menu-btn" onclick="openPanel('shopPanel')">🏪 UPGRADES</button>
-    <button class="menu-btn" onclick="openPanel('prestigePanel')">🌟 PRESTIGE</button>
+    <button class="menu-btn" onclick="openPanel('rebirthPanel')">🌀 REBIRTH</button>
     <button class="menu-btn" onclick="openPanel('settingsPanel')">⚙️ SETTINGS</button>
 </div>
 
@@ -242,41 +230,41 @@
     <button onclick="buyBottler()">🏭 Bottling Plant +8/sec (Cost: <span id="factoryCost">220</span>)</button>
     <button onclick="buyMegaTank()">🌀 Mega Tank +50/sec (Cost: <span id="megaCost">1200</span>)</button>
     
-    <hr id="prestigeUpgradeDivider" style="display: none;">
-    <div id="prestigeUpgradesContainer">
-        <h3 id="prestigeUpgradeTitle" style="display: none;">✨ COSMIC LEGACY UPGRADES</h3>
-        <button id="prestigeUpgrade1" style="display: none; background: #5e3a6a;" onclick="buyPrestigeUpgrade(1)">🌌 Galaxy Relic: +15% Global (Cost: <span id="prestigeUpgrade1Cost">800</span>)</button>
-        <button id="prestigeUpgrade2" style="display: none; background: #2a5f6a;" onclick="buyPrestigeUpgrade(2)">💫 Nebula Core: +25% Global (Cost: <span id="prestigeUpgrade2Cost">5000</span>)</button>
-        <button id="prestigeUpgrade3" style="display: none; background: #8a6a2a;" onclick="buyPrestigeUpgrade(3)">👑 Stellar Crown: +50% Global (Cost: <span id="prestigeUpgrade3Cost">25000</span>)</button>
+    <hr id="rebirthUpgradeDivider" style="display: none;">
+    <div id="rebirthUpgradesContainer">
+        <h3 id="rebirthUpgradeTitle" style="display: none;">✨ ASCENDED LEGACY UPGRADES</h3>
+        <button id="rebirthUpgrade1" style="display: none; background: #5e3a6a;" onclick="buyRebirthUpgrade(1)">🌌 Cosmic Relic: +15% Global (Cost: <span id="rebirthUpgrade1Cost">800</span>)</button>
+        <button id="rebirthUpgrade2" style="display: none; background: #2a5f6a;" onclick="buyRebirthUpgrade(2)">💫 Void Essence: +25% Global (Cost: <span id="rebirthUpgrade2Cost">5000</span>)</button>
+        <button id="rebirthUpgrade3" style="display: none; background: #8a6a2a;" onclick="buyRebirthUpgrade(3)">👑 Eternal Crown: +50% Global (Cost: <span id="rebirthUpgrade3Cost">25000</span>)</button>
     </div>
     <button class="close-panel" onclick="closeAllPanels()">✖ CLOSE</button>
 </div>
 
-<!-- PRESTIGE PANEL: Show only current next tier with COOL names -->
-<div id="prestigePanel" class="panel">
-    <h3>🌟 PRESTIGE - COSMIC EVOLUTION</h3>
-    <div id="prestigeInfo" class="prestige-card">
-        <div id="prestigeDescription"></div>
-        <button id="prestigeActionBtn" onclick="performPrestige()" style="margin-top: 12px; background: #c97e3a;">✨ PRESTIGE NOW</button>
-        <div id="prestigeWarning" class="locked-notice" style="margin-top: 8px;"></div>
+<!-- REBIRTH PANEL - Only shows current available rebirth -->
+<div id="rebirthPanel" class="panel">
+    <h3>🌀 REBIRTH - EVOLVE YOUR COLA</h3>
+    <div id="rebirthInfo" class="prestige-card">
+        <div id="rebirthDescription"></div>
+        <button id="rebirthActionBtn" onclick="performRebirth()" style="margin-top: 12px; background: #c97e3a;">🌀 ASCEND & REBIRTH</button>
+        <div id="rebirthWarning" class="locked-notice" style="margin-top: 8px;"></div>
     </div>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
 <!-- SETTINGS PANEL -->
 <div id="settingsPanel" class="panel">
-    <h3>🎧 AUDIO & THEME</h3>
+    <h3>🎧 AUDIO</h3>
     <button onclick="toggleMusic()">🎵 Toggle Music</button>
     <button onclick="toggleSFX()">🔊 Toggle SFX</button>
     <p>🔊 Master Volume</p>
     <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.3">
     <hr>
-    <p><em>Streak = +1% per click, max 100%!</em><br>⚡ Anti-AutoClicker active: Too fast clicks trigger cooldown!</p>
+    <p><em>🌀 Rebirth changes your COLA ICON permanently!</em><br>⚡ Anti-auto-clicker active.</p>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
 <div id="colaCenter">
-    <div id="cola">🥤</div>
+    <div id="cola">🧃</div>
 </div>
 
 <script>
@@ -289,18 +277,13 @@
     let bottlerCount = 0;
     let megaTankCount = 0;
     
-    // Prestige system: tier 0,1,2,3 with COOL NAMES
-    let prestigeTier = 0;
+    // Rebirth system (instead of prestige)
+    let rebirthTier = 0;      // 0,1,2,3
     let globalBonusPercent = 0;
     
-    // Prestige-exclusive upgrades
-    let prestigeUpgradeBought = [false, false, false];
-    let prestigeUpgradeCost = [0, 800, 5000, 25000];
-    
-    // Streak system
-    let currentStreak = 0;
-    let streakBonusPercent = 0;
-    let streakSaverOwned = false;
+    // Rebirth-exclusive upgrades
+    let rebirthUpgradeBought = [false, false, false];
+    let rebirthUpgradeCost = [0, 800, 5000, 25000];
     
     // Upgrade costs
     let clickUpgradeLevel = 0;
@@ -311,19 +294,16 @@
     let megaCost = 1200;
     
     // ---------- ANTI AUTO-CLICKER SYSTEM ----------
-    let clickTimestamps = [];       // store last 8 click timestamps
+    let clickTimestamps = [];
     let isClickLocked = false;
     let clickLockTimer = null;
-    const MAX_CLICKS_PER_SECOND = 12;    // max 12 clicks per second (human-like)
-    const LOCK_DURATION = 1800;          // lock for 1.8 seconds if detected
+    const MAX_CLICKS_PER_SECOND = 12;
+    const LOCK_DURATION = 1800;
     
     function antiAutoClickerCheck() {
         const now = Date.now();
         clickTimestamps.push(now);
-        // keep only last 15 clicks
         if(clickTimestamps.length > 15) clickTimestamps.shift();
-        
-        // count clicks in last 1000ms
         let recent = clickTimestamps.filter(t => (now - t) <= 1000);
         if(recent.length > MAX_CLICKS_PER_SECOND) {
             if(!isClickLocked) {
@@ -332,8 +312,8 @@
                 if(clickLockTimer) clearTimeout(clickLockTimer);
                 clickLockTimer = setTimeout(() => {
                     isClickLocked = false;
-                    clickTimestamps = []; // reset history after lock
-                    showWarningMessage("🔓 Click unlocked! Play fair 🥤");
+                    clickTimestamps = [];
+                    showWarningMessage("🔓 Click unlocked! Enjoy 🧃");
                 }, LOCK_DURATION);
                 return false;
             }
@@ -374,17 +354,16 @@
     
     function getTotalGlobalMultiplier() {
         let bonus = globalBonusPercent;
-        if(prestigeUpgradeBought[1]) bonus += 15;
-        if(prestigeUpgradeBought[2]) bonus += 25;
-        if(prestigeUpgradeBought[3]) bonus += 50;
+        if(rebirthUpgradeBought[1]) bonus += 15;
+        if(rebirthUpgradeBought[2]) bonus += 25;
+        if(rebirthUpgradeBought[3]) bonus += 50;
         return 1 + (bonus / 100);
     }
     
     function getFinalClickPower() {
         let base = baseClickPower;
         if(quantumActive) base += 50;
-        let streakMulti = 1 + (streakBonusPercent / 100);
-        let total = Math.floor(base * streakMulti * getTotalGlobalMultiplier());
+        let total = Math.floor(base * getTotalGlobalMultiplier());
         return total < 1 ? 1 : total;
     }
     
@@ -394,62 +373,25 @@
         return auto;
     }
     
-    function updateStreakOnClick() {
-        if(isClickLocked) return;
-        if(currentStreak < 100) {
-            currentStreak++;
-            streakBonusPercent = currentStreak;
-            if(streakBonusPercent > 100) streakBonusPercent = 100;
-        } else {
-            streakBonusPercent = 100;
-        }
-        let sb = document.getElementById("streakBox");
-        sb.classList.add("streak-flash");
-        setTimeout(()=> sb.classList.remove("streak-flash"), 200);
-    }
-    
-    let idleTimeout;
-    function resetStreakFromIdle() {
-        if(currentStreak > 0) {
-            if(streakSaverOwned) {
-                let preserved = Math.floor(currentStreak * 0.4);
-                currentStreak = preserved;
-                streakBonusPercent = currentStreak;
-                showFloatingText(`🛡️ Streak Saver! → ${currentStreak}%`, window.innerWidth/2, 80);
-            } else {
-                currentStreak = 0;
-                streakBonusPercent = 0;
-                showFloatingText(`💔 Streak broken!`, window.innerWidth/2, 80);
-            }
-            updateUI();
-        }
-    }
-    function resetIdleTimer() {
-        if(idleTimeout) clearTimeout(idleTimeout);
-        idleTimeout = setTimeout(() => resetStreakFromIdle(), 5200);
-    }
-    
-    // Cola name based on prestige tier (Galaxy, Nebula, Stellar, Cosmic)
-    function getColaName() {
-        if(prestigeTier === 0) return "🥤 Classic Cola";
-        if(prestigeTier === 1) return "🌌 Galaxy Cola";
-        if(prestigeTier === 2) return "💫 Nebula Cola";
-        return "👑 Stellar Cola";
-    }
-    
+    // COLA ICONS that change ONLY on rebirth (no background changes)
     function getColaEmoji() {
-        if(prestigeTier === 0) return "🥤";
-        if(prestigeTier === 1) return "🌌";
-        if(prestigeTier === 2) return "💫";
-        return "👑";
+        if(rebirthTier === 0) return "🧃";     // Juice box / classic cola
+        if(rebirthTier === 1) return "🍷";     // Galaxy cola (dark mystic)
+        if(rebirthTier === 2) return "🍾";     // Nebula cola (sparkling)
+        return "🏆";                           // Stellar cola (trophy / legendary)
+    }
+    
+    function getColaName() {
+        if(rebirthTier === 0) return "Classic Cola";
+        if(rebirthTier === 1) return "Galaxy Cola";
+        if(rebirthTier === 2) return "Nebula Cola";
+        return "Stellar Cola";
     }
     
     function updateUI() {
         document.getElementById("colaCount").innerText = Math.floor(cola);
         document.getElementById("allTime").innerText = Math.floor(totalAllTime);
-        document.getElementById("streakValue").innerText = currentStreak;
-        document.getElementById("streakPercent").innerText = streakBonusPercent;
-        document.getElementById("prestigeLevel").innerText = prestigeTier;
+        document.getElementById("prestigeLevel").innerText = rebirthTier;
         document.getElementById("prestigeBonus").innerText = globalBonusPercent;
         
         document.getElementById("clickCost").innerText = clickCost;
@@ -458,92 +400,84 @@
         document.getElementById("factoryCost").innerText = bottlerCost;
         document.getElementById("megaCost").innerText = megaCost;
         
-        let divider = document.getElementById("prestigeUpgradeDivider");
-        let title = document.getElementById("prestigeUpgradeTitle");
-        let btn1 = document.getElementById("prestigeUpgrade1");
-        let btn2 = document.getElementById("prestigeUpgrade2");
-        let btn3 = document.getElementById("prestigeUpgrade3");
+        // Show rebirth upgrades based on tier
+        let divider = document.getElementById("rebirthUpgradeDivider");
+        let title = document.getElementById("rebirthUpgradeTitle");
+        let btn1 = document.getElementById("rebirthUpgrade1");
+        let btn2 = document.getElementById("rebirthUpgrade2");
+        let btn3 = document.getElementById("rebirthUpgrade3");
         
-        if(prestigeTier >= 1) {
+        if(rebirthTier >= 1) {
             divider.style.display = "block";
             title.style.display = "block";
             btn1.style.display = "block";
-            if(prestigeUpgradeBought[1]) btn1.disabled = true;
-            else btn1.disabled = false;
-            document.getElementById("prestigeUpgrade1Cost").innerText = prestigeUpgradeCost[1];
+            btn1.disabled = rebirthUpgradeBought[1];
+            document.getElementById("rebirthUpgrade1Cost").innerText = rebirthUpgradeCost[1];
         } else { btn1.style.display = "none"; }
         
-        if(prestigeTier >= 2) {
+        if(rebirthTier >= 2) {
             btn2.style.display = "block";
-            if(prestigeUpgradeBought[2]) btn2.disabled = true;
-            else btn2.disabled = false;
-            document.getElementById("prestigeUpgrade2Cost").innerText = prestigeUpgradeCost[2];
+            btn2.disabled = rebirthUpgradeBought[2];
+            document.getElementById("rebirthUpgrade2Cost").innerText = rebirthUpgradeCost[2];
         } else { btn2.style.display = "none"; }
         
-        if(prestigeTier >= 3) {
+        if(rebirthTier >= 3) {
             btn3.style.display = "block";
-            if(prestigeUpgradeBought[3]) btn3.disabled = true;
-            else btn3.disabled = false;
-            document.getElementById("prestigeUpgrade3Cost").innerText = prestigeUpgradeCost[3];
+            btn3.disabled = rebirthUpgradeBought[3];
+            document.getElementById("rebirthUpgrade3Cost").innerText = rebirthUpgradeCost[3];
         } else { btn3.style.display = "none"; }
         
-        updatePrestigePanelDescription();
+        updateRebirthPanelDescription();
         
-        let bodyClass = document.body;
-        bodyClass.classList.remove("prestige-0", "prestige-1", "prestige-2", "prestige-3");
-        if(prestigeTier === 0) bodyClass.classList.add("prestige-0");
-        else if(prestigeTier === 1) bodyClass.classList.add("prestige-1");
-        else if(prestigeTier === 2) bodyClass.classList.add("prestige-2");
-        else if(prestigeTier === 3) bodyClass.classList.add("prestige-3");
-        
+        // UPDATE COLA ICON (the only thing that changes visually)
         let colaDiv = document.getElementById("cola");
         colaDiv.innerText = getColaEmoji();
-        document.title = `${getColaName()} Clicker - ${Math.floor(cola)} cola`;
+        document.title = `${getColaName()} - ${Math.floor(cola)} cola`;
     }
     
-    function updatePrestigePanelDescription() {
-        let descDiv = document.getElementById("prestigeDescription");
-        let actionBtn = document.getElementById("prestigeActionBtn");
-        let warningDiv = document.getElementById("prestigeWarning");
+    function updateRebirthPanelDescription() {
+        let descDiv = document.getElementById("rebirthDescription");
+        let actionBtn = document.getElementById("rebirthActionBtn");
+        let warningDiv = document.getElementById("rebirthWarning");
         
-        if(prestigeTier === 0) {
-            descDiv.innerHTML = `<span class="prestige-highlight">🌌 PRESTIGE 1: GALAXY COLA</span><br>
+        if(rebirthTier === 0) {
+            descDiv.innerHTML = `<span class="prestige-highlight">🌀 1st REBIRTH: GALAXY COLA</span><br>
             ➤ Become <strong>Galaxy Cola</strong>! +30% permanent bonus!<br>
             ➤ Unlock <strong>3 cosmic upgrades</strong> in shop!<br>
-            ➤ Cola evolves into 🌌<br>
+            ➤ Cola icon changes: 🧃 → 🍷<br>
             ➤ Requirement: 10,000 total cola<br>
-            <span style="color:#ffaa66;">⚠️ Reset all upgrades, keep total & bonus!</span>`;
+            <span style="color:#ffaa66;">⚠️ Reset all upgrades & cola, keep total & bonus!</span>`;
             if(totalAllTime >= 10000) {
                 actionBtn.disabled = false;
-                warningDiv.innerText = "✅ Ready to become GALAXY COLA! +30% bonus.";
+                warningDiv.innerText = "✅ Ready to Rebirth! Become Galaxy Cola (+30%)";
             } else {
                 actionBtn.disabled = true;
                 warningDiv.innerText = `🔒 Need ${10000 - totalAllTime} more total cola.`;
             }
         } 
-        else if(prestigeTier === 1) {
-            descDiv.innerHTML = `<span class="prestige-highlight">💫 PRESTIGE 2: NEBULA COLA</span><br>
+        else if(rebirthTier === 1) {
+            descDiv.innerHTML = `<span class="prestige-highlight">🌀 2nd REBIRTH: NEBULA COLA</span><br>
             ➤ Evolve to <strong>Nebula Cola</strong>! +30% more (total +60%)!<br>
             ➤ Unlock <strong>Nebula-tier relics</strong>!<br>
-            ➤ Cola becomes 💫<br>
+            ➤ Cola icon changes: 🍷 → 🍾<br>
             ➤ Requirement: 100,000 total cola<br>`;
             if(totalAllTime >= 100000) {
                 actionBtn.disabled = false;
-                warningDiv.innerText = "✅ Ready for NEBULA COLA! +30% stacking.";
+                warningDiv.innerText = "✅ Ready for Nebula Rebirth! +30% stacking.";
             } else {
                 actionBtn.disabled = true;
                 warningDiv.innerText = `🔒 Need ${100000 - totalAllTime} more total cola.`;
             }
         }
-        else if(prestigeTier === 2) {
-            descDiv.innerHTML = `<span class="prestige-highlight">👑 PRESTIGE 3: STELLAR COLA</span><br>
+        else if(rebirthTier === 2) {
+            descDiv.innerHTML = `<span class="prestige-highlight">🌀 3rd REBIRTH: STELLAR COLA</span><br>
             ➤ Ascend to <strong>Stellar Cola</strong>! +30% more (total +90%)!<br>
-            ➤ Unlock <strong>Stellar Crown upgrade</strong>!<br>
-            ➤ Cola becomes 👑<br>
+            ➤ Unlock <strong>Eternal Crown upgrade</strong>!<br>
+            ➤ Cola icon becomes 🏆<br>
             ➤ Requirement: 1,000,000 total cola<br>`;
             if(totalAllTime >= 1000000) {
                 actionBtn.disabled = false;
-                warningDiv.innerText = "✅ ULTIMATE PRESTIGE! Become STELLAR COLA.";
+                warningDiv.innerText = "✅ ULTIMATE REBIRTH! Become Stellar Cola.";
             } else {
                 actionBtn.disabled = true;
                 warningDiv.innerText = `🔒 Need ${1000000 - totalAllTime} more total cola.`;
@@ -551,31 +485,31 @@
         }
         else {
             descDiv.innerHTML = `<span class="prestige-highlight">✨ COSMIC LEGEND</span><br>
-            You are <strong>Stellar Cola Master</strong>! Max prestige reached.<br>
+            You are <strong>Stellar Cola Master</strong>! Max rebirth reached.<br>
             Keep buying legacy upgrades! +90% permanent bonus!`;
             actionBtn.disabled = true;
             actionBtn.innerText = "🌟 MAXED";
-            warningDiv.innerText = "You rule the galaxy!";
+            warningDiv.innerText = "You have achieved ultimate cola form!";
         }
     }
     
-    function performPrestige() {
-        let canPrestige = false;
+    function performRebirth() {
+        let canRebirth = false;
         let newTier = 0;
-        if(prestigeTier === 0 && totalAllTime >= 10000) { canPrestige = true; newTier = 1; }
-        else if(prestigeTier === 1 && totalAllTime >= 100000) { canPrestige = true; newTier = 2; }
-        else if(prestigeTier === 2 && totalAllTime >= 1000000) { canPrestige = true; newTier = 3; }
+        if(rebirthTier === 0 && totalAllTime >= 10000) { canRebirth = true; newTier = 1; }
+        else if(rebirthTier === 1 && totalAllTime >= 100000) { canRebirth = true; newTier = 2; }
+        else if(rebirthTier === 2 && totalAllTime >= 1000000) { canRebirth = true; newTier = 3; }
         
-        if(!canPrestige) {
-            showFloatingText("❌ Prestige requirements not met!", window.innerWidth/2, 120);
+        if(!canRebirth) {
+            showFloatingText("❌ Rebirth requirements not met!", window.innerWidth/2, 120);
             return;
         }
         
         let newBonus = globalBonusPercent + 30;
         let newName = (newTier === 1) ? "GALAXY COLA" : (newTier === 2) ? "NEBULA COLA" : "STELLAR COLA";
-        if(!confirm(`✨ PRESTIGE TO ${newName}?\n\n+30% permanent bonus (total +${newBonus}%).\nYou lose all cola, click upgrades, auto producers.\nBut unlock cosmic relics!\n\nContinue?`)) return;
+        if(!confirm(`🌀 REBIRTH TO ${newName}?\n\n+30% permanent bonus (total +${newBonus}%).\nYou lose all cola, click upgrades, auto producers.\nBut unlock cosmic relics!\nYour cola icon will change permanently!\n\nContinue?`)) return;
         
-        // Reset everything except prestige tier & bonus
+        // Reset progress
         cola = 0;
         baseClickPower = 1;
         clickUpgradeLevel = 0;
@@ -588,32 +522,33 @@
         siphonCost = 30;
         bottlerCost = 220;
         megaCost = 1200;
-        streakSaverOwned = false;
-        currentStreak = 0;
-        streakBonusPercent = 0;
         
         globalBonusPercent += 30;
-        prestigeTier = newTier;
+        rebirthTier = newTier;
+        
+        // Visual rebirth animation on cola
+        let colaElement = document.getElementById("cola");
+        colaElement.classList.add("rebirth-flash");
+        setTimeout(() => colaElement.classList.remove("rebirth-flash"), 800);
         
         playUpgradeSound();
         updateUI();
         closeAllPanels();
-        showFloatingText(`🌟 PRESTIGE ${newTier}: ${newName} ACHIEVED! +30% PERMANENT BONUS!`, window.innerWidth/2, 100);
-        resetIdleTimer();
+        showFloatingText(`🌀 REBIRTH ${newTier}: ${newName} ACHIEVED! +30% PERMANENT BONUS!`, window.innerWidth/2, 100);
     }
     
-    function buyPrestigeUpgrade(tier) {
-        if(prestigeUpgradeBought[tier]) {
+    function buyRebirthUpgrade(tier) {
+        if(rebirthUpgradeBought[tier]) {
             showFloatingText("Already own this relic!",0,0);
             return;
         }
-        let cost = prestigeUpgradeCost[tier];
+        let cost = rebirthUpgradeCost[tier];
         if(cola >= cost) {
             cola -= cost;
-            prestigeUpgradeBought[tier] = true;
+            rebirthUpgradeBought[tier] = true;
             playUpgradeSound();
             let bonusText = tier===1?"+15%":tier===2?"+25%":"+50%";
-            showFloatingText(`✨ Cosmic Relic acquired! ${bonusText} global bonus!`,0,0);
+            showFloatingText(`✨ Ascended Relic acquired! ${bonusText} global bonus!`,0,0);
             updateUI();
         } else {
             showFloatingText(`❌ Need ${cost} cola!`,0,0);
@@ -666,16 +601,6 @@
             updateUI();
         } else showFloatingText("❌ Need cola",0,0);
     }
-    function buyStreakSaver() {
-        if(!streakSaverOwned && cola >= 500) {
-            cola -= 500;
-            streakSaverOwned = true;
-            playUpgradeSound();
-            showFloatingText("🛡️ Streak Saver ACTIVE!",0,0);
-            updateUI();
-        } else if(streakSaverOwned) showFloatingText("Already owned!",0,0);
-        else showFloatingText("Need 500 cola",0,0);
-    }
     
     function showFloatingText(msg, x, y) {
         let f = document.createElement("div");
@@ -699,14 +624,14 @@
         let gain = getFinalClickPower();
         cola += gain;
         totalAllTime += gain;
-        updateStreakOnClick();
-        resetIdleTimer();
         playClickSound();
+        
         let colaDiv = document.getElementById("cola");
         colaDiv.classList.add("click-effect");
         setTimeout(()=> colaDiv.classList.remove("click-effect"), 100);
+        
         let rect = colaDiv.getBoundingClientRect();
-        showFloatingText(`+${gain} (${streakBonusPercent}% streak)`, rect.left+rect.width/2, rect.top+rect.height/2-25);
+        showFloatingText(`+${gain}`, rect.left+rect.width/2, rect.top+rect.height/2-25);
         updateUI();
     }
     
@@ -740,11 +665,7 @@
     
     document.getElementById("cola").addEventListener("click", onColaClick);
     document.getElementById("volumeSlider").addEventListener("input", (e) => setVolume(parseFloat(e.target.value)));
-    document.body.addEventListener("click", (e) => {
-        if(!e.target.closest('#cola')) resetIdleTimer();
-    });
     
-    resetIdleTimer();
     updateUI();
 </script>
 </body>
