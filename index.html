@@ -13,24 +13,23 @@ body {
   overflow: hidden;
 }
 
-/* BIG COLA DISPLAY */
+/* HUD */
 #hud {
   position: absolute;
   top: 10px;
   left: 10px;
 }
 
-#bigCola {
+#big {
   font-size: 60px;
-  font-weight: bold;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
-/* TOP MENU */
+/* MENU */
 #top {
   position: absolute;
-  top: 70px;
+  top: 80px;
   left: 10px;
 }
 
@@ -56,25 +55,21 @@ button {
   font-size: 170px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.1s;
 }
 
-#cola:active {
-  transform: scale(0.9);
-}
-
-/* FLOAT */
+/* FLOAT FIXED (NO COPYING BUG) */
 .float {
   position: fixed;
-  color: #00ff88;
-  font-size: 22px;
   font-weight: bold;
+  color: #00ff88;
   animation: floatUp 1s forwards;
+  pointer-events: none;
+  text-shadow: 0 0 10px #00ff88;
 }
 
 @keyframes floatUp {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-120px); }
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-140px) scale(1.4); }
 }
 
 /* PANELS */
@@ -89,30 +84,9 @@ button {
   display: none;
 }
 
-/* STREAK HUD (BACK + CLEAR) */
-#streakHUD {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  width: 260px;
-  background: #111;
-  padding: 10px;
-  border-radius: 10px;
-}
-
-#bar {
-  height: 10px;
-  background: #333;
-  border-radius: 5px;
-  overflow: hidden;
-  margin-top: 5px;
-}
-
-#fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #00ff88, #00aaff);
-  transition: width 0.1s;
+/* SETTINGS */
+input {
+  width: 100%;
 }
 </style>
 </head>
@@ -120,51 +94,45 @@ button {
 <body>
 
 <div id="hud">
-  🥤 Cola: <span id="colaCount">0</span>
+🥤 Cola: <span id="colaCount">0</span>
 </div>
 
-<div id="bigCola">
-  TOTAL: <span id="allTime">0</span>
+<div id="big">
+TOTAL: <span id="allTime">0</span>
 </div>
 
 <div id="top">
   <button onclick="openTab('shop')">Upgrades</button>
   <button onclick="openTab('settings')">Settings</button>
-  <button onclick="openTab('leader')">Leaderboard</button>
 </div>
 
 <div id="shop" class="panel">
-  <h3>Upgrades</h3>
-
-  <p>⚡ CLICK UPGRADES</p>
+  <h3>⚡ Click Upgrades</h3>
   <button onclick="buyClick()">+1 Click (10)</button>
-  <button onclick="buyGalaxy()">Galaxy Cola +100 Click (500)</button>
+  <button onclick="buyGalaxy()">Galaxy Click +100 (500)</button>
 
   <hr>
 
-  <p>🤖 AUTO UPGRADES</p>
+  <h3>🤖 Auto Upgrades</h3>
   <button onclick="buyAuto()">Auto Cola (25)</button>
-  <button onclick="buyFactory()">Coke Factory +30/s (200)</button>
+  <button onclick="buyFactory()">Factory +30/s (200)</button>
 </div>
 
 <div id="settings" class="panel">
   <h3>Settings</h3>
-  <p>Prestige: <span id="prestige">0</span></p>
-</div>
 
-<div id="leader" class="panel">
-  <h3>Leaderboard</h3>
-  <div id="board"></div>
+  <p>Music</p>
+  <button onclick="toggleMusic()">Toggle Music</button>
+
+  <p>SFX</p>
+  <button onclick="toggleSFX()">Toggle SFX</button>
+
+  <p>Volume</p>
+  <input type="range" min="0" max="1" step="0.1" onchange="setVol(this.value)">
 </div>
 
 <div id="main">
   <div id="cola">🥤</div>
-</div>
-
-<!-- STREAK -->
-<div id="streakHUD">
-  <div>STREAK: <span id="multi">1.00x</span> (100 clicks max)</div>
-  <div id="bar"><div id="fill"></div></div>
 </div>
 
 <script>
@@ -172,55 +140,56 @@ let cola = 0;
 let allTime = 0;
 let clickPower = 1;
 let auto = 0;
-let prestige = 0;
-let boost = 1;
 
-/* STREAK SYSTEM */
-let streak = 0;
-let lastClick = 0;
+/* AUDIO */
+let musicOn = true;
+let sfxOn = true;
+let volume = 0.3;
+
+/* SIMPLE AUDIO ENGINE */
+let music = new Audio();
+music.loop = true;
+music.volume = volume;
+music.src = "https://cdn.pixabay.com/audio/2022/10/16/audio_12b5f1b8a1.mp3";
+
+/* CLICK SOUND (synthetic) */
+function clickSound(){
+  if(!sfxOn) return;
+  let a = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c1b6d4b4d4.mp3");
+  a.volume = volume;
+  a.play();
+}
+
+/* MUSIC */
+music.play();
 
 /* CLICK */
 document.getElementById("cola").onclick = (e) => {
-  let now = Date.now();
-
-  if(now - lastClick < 600) streak++;
-  else streak = 1;
-
-  lastClick = now;
-
-  // 🔥 100 CLICK GRIND SYSTEM → MAX x2.0
-  let mult = 1 + Math.min(streak / 100, 1);
-
-  let gain = clickPower * mult * boost;
+  let gain = clickPower;
 
   cola += gain;
   allTime += gain;
 
+  clickSound();
   float(e, gain);
 
-  updateStreak(mult);
   update();
 };
 
-/* FLOAT */
+/* FLOAT FIX (no copy bug) */
 function float(e,val){
   let f = document.createElement("div");
   f.className = "float";
-  f.innerText = "+" + val.toFixed(1);
+  f.innerText = "+" + val;
 
-  f.style.left = e.clientX + "px";
-  f.style.top = e.clientY + "px";
+  let x = e.clientX + (Math.random()*40 - 20);
+  let y = e.clientY + (Math.random()*40 - 20);
+
+  f.style.left = x + "px";
+  f.style.top = y + "px";
 
   document.body.appendChild(f);
   setTimeout(()=>f.remove(),1000);
-}
-
-/* STREAK UI */
-function updateStreak(mult){
-  document.getElementById("multi").innerText = mult.toFixed(2) + "x";
-
-  let percent = Math.min((streak / 100) * 100, 100);
-  document.getElementById("fill").style.width = percent + "%";
 }
 
 /* UPGRADES */
@@ -232,39 +201,39 @@ function buyFactory(){ if(cola>=200){ cola-=200; auto+=30; update(); } }
 
 /* AUTO */
 setInterval(()=>{
-  cola += auto * boost;
-  allTime += auto * boost;
+  cola += auto;
+  allTime += auto;
   update();
 },1000);
 
-/* PANELS */
+/* TABS */
 function openTab(id){
-  ["shop","settings","leader"].forEach(p=>{
+  ["shop","settings"].forEach(p=>{
     document.getElementById(p).style.display="none";
   });
   document.getElementById(id).style.display="block";
 }
 
-/* LEADERBOARD */
-function updateBoard(){
-  let fake = [
-    ["You", allTime],
-    ["Player2", 5000],
-    ["Player3", 3000]
-  ];
+/* AUDIO CONTROLS */
+function toggleMusic(){
+  musicOn = !musicOn;
+  if(musicOn) music.play();
+  else music.pause();
+}
 
-  fake.sort((a,b)=>b[1]-a[1]);
+function toggleSFX(){
+  sfxOn = !sfxOn;
+}
 
-  document.getElementById("board").innerHTML =
-    fake.map(p=>`<p>${p[0]} - ${p[1].toFixed(0)}</p>`).join("");
+function setVol(v){
+  volume = v;
+  music.volume = v;
 }
 
 /* UPDATE */
 function update(){
-  document.getElementById("colaCount").innerText = Math.floor(cola);
-  document.getElementById("allTime").innerText = Math.floor(allTime);
-  document.getElementById("prestige").innerText = prestige;
-  updateBoard();
+  document.getElementById("colaCount").innerText = cola;
+  document.getElementById("allTime").innerText = allTime;
 }
 </script>
 
