@@ -1,100 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<title>Cola Clicker</title>
-
-<style>
-body {
-  margin: 0;
-  font-family: Arial;
-  background: #111;
-  color: white;
-}
-
-/* CENTER GAME */
-#main {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  flex-direction: column;
-}
-
-#colaBtn {
-  font-size: 80px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-.float {
-  position: absolute;
-  color: #0f0;
-  font-size: 20px;
-  animation: floatUp 1s forwards;
-}
-
-@keyframes floatUp {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-80px); }
-}
-
-/* MENU */
-#menu {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-}
-
-button {
-  margin: 5px;
-  padding: 8px;
-  cursor: pointer;
-}
-
-/* SETTINGS PANEL */
-#settings {
-  position: absolute;
-  top: 50px;
-  left: 10px;
-  background: #222;
-  padding: 10px;
-  display: none;
-}
-</style>
-</head>
-
-<body>
-
-<div id="menu">
-  <button onclick="toggleSettings()">Settings</button>
-</div>
-
-<div id="settings">
-  <p>🥤 All-time cola: <span id="allTime">0</span></p>
-</div>
-
-<div id="main">
-  <button id="colaBtn">🥤</button>
-</div>
-
 <script>
 let cola = 0;
 let allTime = 0;
 let clickPower = 1;
+let auto = 0;
 
 const btn = document.getElementById("colaBtn");
 
 btn.onclick = (e) => {
-  cola += clickPower;
-  allTime += clickPower;
+  let gain = clickPower;
 
-  // floating number
+  // 🔥 RANDOM BONUS (20% chance extra +1)
+  if (Math.random() < 0.2) {
+    gain += 1;
+  }
+
+  cola += gain;
+  allTime += gain;
+
+  // floating text
   let f = document.createElement("div");
   f.className = "float";
-  f.innerText = "+" + clickPower;
+  f.innerText = "+" + gain;
   f.style.left = e.pageX + "px";
   f.style.top = e.pageY + "px";
   document.body.appendChild(f);
@@ -104,16 +30,45 @@ btn.onclick = (e) => {
   update();
 };
 
+function buyClick(){
+  if(cola >= 10){
+    cola -= 10;
+    clickPower++;
+    update();
+  }
+}
+
+function buyAuto(){
+  if(cola >= 25){
+    cola -= 25;
+    auto++;
+    update();
+  }
+}
+
 function update(){
   document.getElementById("allTime").innerText = allTime;
 }
 
-// SETTINGS TOGGLE
-function toggleSettings(){
-  let s = document.getElementById("settings");
-  s.style.display = s.style.display === "none" ? "block" : "none";
+/* 🔥 AUTO SYSTEM */
+setInterval(()=>{
+  cola += auto;
+  allTime += auto;
+  update();
+},1000);
+
+/* 🔥 FIXED MENU SYSTEM (ONLY ONE OPEN) */
+function toggle(id){
+  let panels = ["shop","settings"];
+
+  panels.forEach(p=>{
+    let el = document.getElementById(p);
+    if(el) el.style.display = "none";
+  });
+
+  let target = document.getElementById(id);
+  if(target){
+    target.style.display = "block";
+  }
 }
 </script>
-
-</body>
-</html>
