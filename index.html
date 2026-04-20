@@ -13,7 +13,7 @@ body {
   overflow: hidden;
 }
 
-/* TOP BAR */
+/* TOP */
 #top {
   position: absolute;
   top: 10px;
@@ -43,25 +43,19 @@ button {
   font-size: 140px;
   cursor: pointer;
   user-select: none;
-  transition: transform 0.1s;
 }
 
-#cola:active {
-  transform: scale(0.9);
-}
-
-/* 💥 FLOATING NUMBERS (UPGRADED) */
+/* FLOAT */
 .float {
   position: fixed;
-  font-weight: bold;
+  color: #00ff88;
+  font-size: 20px;
   animation: floatUp 1s forwards;
-  pointer-events: none;
-  text-shadow: 0 0 10px rgba(0,255,100,0.8);
 }
 
 @keyframes floatUp {
-  0% { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-120px) scale(1.3); }
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-100px); }
 }
 
 /* PANELS */
@@ -76,32 +70,29 @@ button {
   display: none;
 }
 
-/* 🔥 STREAK HUD */
-#streakHUD {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  width: 220px;
-  background: #111;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #333;
-}
-
-#bar {
-  height: 10px;
-  background: #333;
-  border-radius: 5px;
-  overflow: hidden;
-  margin-top: 5px;
-}
-
-#fill {
+/* PRESTIGE MODAL */
+#prestigeModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #00ff88, #00aaff);
-  transition: width 0.2s;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
 }
+
+#prestigeBox {
+  background: #111;
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+}
+
+.green { color: #00ff88; }
+.red { color: #ff4444; }
 </style>
 </head>
 
@@ -111,13 +102,15 @@ button {
   <button onclick="openTab('shop')">Upgrades</button>
   <button onclick="openTab('settings')">Settings</button>
   <button onclick="openTab('leader')">Leaderboard</button>
-  <button onclick="prestige()">Prestige ⭐</button>
+  <button onclick="openPrestige()">Prestige ⭐</button>
 </div>
 
 <div id="shop" class="panel">
   <h3>Upgrades</h3>
   <button onclick="buyClick()">+1 Click (10)</button>
   <button onclick="buyAuto()">Auto Cola (25)</button>
+  <button onclick="buyFactory()">Coke Factory (200)</button>
+  <button onclick="buyGalaxy()">Galaxy Cola (500)</button>
 </div>
 
 <div id="settings" class="panel">
@@ -135,10 +128,18 @@ button {
   <div id="cola">🥤</div>
 </div>
 
-<!-- 🔥 STREAK UI -->
-<div id="streakHUD">
-  <div>Streak Multiplier: <span id="multi">1.0x</span></div>
-  <div id="bar"><div id="fill"></div></div>
+<!-- PRESTIGE POPUP -->
+<div id="prestigeModal">
+  <div id="prestigeBox">
+    <h2>Prestige?</h2>
+
+    <p class="green">✔ Unlock 3 new upgrades</p>
+    <p class="green">✔ +30% permanent cola boost</p>
+    <p class="red">❌ Lose ALL upgrades</p>
+
+    <button onclick="doPrestige()">YES</button>
+    <button onclick="closePrestige()">NO</button>
+  </div>
 </div>
 
 <script>
@@ -147,64 +148,32 @@ let allTime = 0;
 let clickPower = 1;
 let auto = 0;
 let prestigeLevel = 0;
-
-let streak = 0;
-let lastClick = 0;
+let boost = 1;
 
 const colaBtn = document.getElementById("cola");
 
 /* CLICK */
 colaBtn.onclick = (e) => {
-  let now = Date.now();
-
-  if (now - lastClick < 700) streak++;
-  else streak = 1;
-
-  lastClick = now;
-
-  let multiplier = 1 + Math.min(streak * 0.05, 0.5);
-
-  let gain = clickPower * multiplier;
+  let gain = clickPower * boost;
 
   cola += gain;
   allTime += gain;
 
-  showFloat(e, gain, multiplier);
-
-  updateStreakUI(multiplier);
-
+  float(e, "+" + gain.toFixed(1));
   update();
 };
 
-/* 💥 BETTER FLOATING NUMBERS */
-function showFloat(e, gain, mult){
+/* FLOAT */
+function float(e,text){
   let f = document.createElement("div");
   f.className = "float";
+  f.innerText = text;
 
-  let color = mult > 1.3 ? "#ffcc00" : "#00ff88";
-  let size = 16 + mult * 10;
-
-  f.style.color = color;
-  f.style.fontSize = size + "px";
-
-  f.innerText = "+" + gain.toFixed(1);
-
-  let x = e.clientX + (Math.random() * 20 - 10);
-  let y = e.clientY + (Math.random() * 20 - 10);
-
-  f.style.left = x + "px";
-  f.style.top = y + "px";
+  f.style.left = e.clientX + "px";
+  f.style.top = e.clientY + "px";
 
   document.body.appendChild(f);
   setTimeout(()=>f.remove(),1000);
-}
-
-/* 🔥 STREAK UI */
-function updateStreakUI(mult){
-  document.getElementById("multi").innerText = mult.toFixed(2) + "x";
-
-  let percent = Math.min((streak / 20) * 100, 100);
-  document.getElementById("fill").style.width = percent + "%";
 }
 
 /* UPGRADES */
@@ -224,10 +193,26 @@ function buyAuto(){
   }
 }
 
+function buyFactory(){
+  if(cola >= 200){
+    cola -= 200;
+    auto += 30;
+    update();
+  }
+}
+
+function buyGalaxy(){
+  if(cola >= 500){
+    cola -= 500;
+    clickPower += 100;
+    update();
+  }
+}
+
 /* AUTO */
 setInterval(()=>{
-  cola += auto;
-  allTime += auto;
+  cola += auto * boost;
+  allTime += auto * boost;
   update();
 },1000);
 
@@ -237,6 +222,35 @@ function openTab(id){
     document.getElementById(p).style.display = "none";
   });
   document.getElementById(id).style.display = "block";
+}
+
+/* PRESTIGE UI */
+function openPrestige(){
+  document.getElementById("prestigeModal").style.display = "flex";
+}
+
+function closePrestige(){
+  document.getElementById("prestigeModal").style.display = "none";
+}
+
+/* PRESTIGE LOGIC */
+function doPrestige(){
+  if(allTime < 1000){
+    alert("Need 1000 cola!");
+    return;
+  }
+
+  prestigeLevel++;
+  boost *= 1.3;
+
+  cola = 0;
+  clickPower = 1;
+  auto = 0;
+
+  alert("Prestiged! +30% boost unlocked ⭐");
+
+  closePrestige();
+  update();
 }
 
 /* LEADERBOARD */
@@ -253,46 +267,12 @@ function updateBoard(){
     fake.map(p=>`<p>${p[0]} - ${p[1].toFixed(0)}</p>`).join("");
 }
 
-/* PRESTIGE */
-function prestige(){
-  if(allTime >= 1000){
-    prestigeLevel++;
-    cola = 0;
-    clickPower = 1 + prestigeLevel;
-    auto = 0;
-    allTime = 0;
-    streak = 0;
-    alert("Prestiged! ⭐");
-    update();
-  }
-}
-
 /* UPDATE */
 function update(){
   document.getElementById("allTime").innerText = Math.floor(allTime);
   document.getElementById("prestige").innerText = prestigeLevel;
   updateBoard();
 }
-
-/* SAVE */
-setInterval(()=>{
-  localStorage.setItem("colaSave", JSON.stringify({
-    cola, allTime, clickPower, auto, prestigeLevel
-  }));
-},2000);
-
-/* LOAD */
-window.onload = ()=>{
-  let save = JSON.parse(localStorage.getItem("colaSave"));
-  if(save){
-    cola = save.cola;
-    allTime = save.allTime;
-    clickPower = save.clickPower;
-    auto = save.auto;
-    prestigeLevel = save.prestigeLevel;
-  }
-  update();
-};
 </script>
 
 </body>
