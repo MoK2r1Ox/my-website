@@ -30,7 +30,7 @@ button {
   cursor: pointer;
 }
 
-/* CENTER */
+/* CENTER GAME */
 #main {
   height: 100vh;
   display: flex;
@@ -42,20 +42,21 @@ button {
 #cola {
   font-size: 140px;
   cursor: pointer;
-  transition: transform 0.1s;
   user-select: none;
+  transition: transform 0.1s;
 }
 
 #cola:active {
   transform: scale(0.9);
 }
 
-/* FLOAT */
+/* FLOATING NUMBERS */
 .float {
-  position: absolute;
+  position: fixed;
   color: #00ff88;
   font-size: 20px;
   animation: floatUp 1s forwards;
+  pointer-events: none;
 }
 
 @keyframes floatUp {
@@ -73,14 +74,6 @@ button {
   padding: 10px;
   border-radius: 10px;
   display: none;
-}
-
-/* STREAK */
-#streak {
-  position: absolute;
-  bottom: 20px;
-  font-size: 18px;
-  color: gold;
 }
 </style>
 </head>
@@ -107,15 +100,13 @@ button {
 </div>
 
 <div id="leader" class="panel">
-  <h3>Top Cola Players</h3>
+  <h3>Leaderboard</h3>
   <div id="board"></div>
 </div>
 
 <div id="main">
   <div id="cola">🥤</div>
 </div>
-
-<div id="streak">Streak: 0x</div>
 
 <script>
 let cola = 0;
@@ -124,43 +115,47 @@ let clickPower = 1;
 let auto = 0;
 let prestigeLevel = 0;
 
-/* 🔥 STREAK SYSTEM */
 let streak = 0;
 let lastClick = 0;
 
 const colaBtn = document.getElementById("cola");
 
+/* CLICK */
 colaBtn.onclick = (e) => {
   let now = Date.now();
 
-  // streak logic
-  if (now - lastClick < 600) {
+  // 🔥 NERFED STREAK (max ~1.5x)
+  if (now - lastClick < 700) {
     streak++;
   } else {
     streak = 1;
   }
   lastClick = now;
 
-  let multiplier = 1 + Math.floor(streak / 5);
+  let multiplier = 1 + Math.min(streak * 0.05, 0.5);
 
   let gain = clickPower * multiplier;
 
   cola += gain;
   allTime += gain;
 
-  showFloat(e, "+" + gain);
-
-  document.getElementById("streak").innerText = "Streak: " + multiplier + "x";
+  showFloat(e, "+" + gain.toFixed(1));
 
   update();
 };
 
+/* FLOAT FIX */
 function showFloat(e, text){
   let f = document.createElement("div");
   f.className = "float";
   f.innerText = text;
-  f.style.left = e.pageX + "px";
-  f.style.top = e.pageY + "px";
+
+  let x = e.clientX + (Math.random() * 20 - 10);
+  let y = e.clientY + (Math.random() * 20 - 10);
+
+  f.style.left = x + "px";
+  f.style.top = y + "px";
+
   document.body.appendChild(f);
   setTimeout(()=>f.remove(),1000);
 }
@@ -197,7 +192,7 @@ function openTab(id){
   document.getElementById(id).style.display = "block";
 }
 
-/* LEADERBOARD (LOCAL TOP 100 SIM) */
+/* LEADERBOARD (LOCAL FAKE) */
 function updateBoard(){
   let fake = [
     ["You", allTime],
@@ -219,14 +214,15 @@ function prestige(){
     clickPower = 1 + prestigeLevel;
     auto = 0;
     allTime = 0;
-    alert("Prestiged! Cola became GOLD COLA ⭐");
+    streak = 0;
+    alert("Prestiged! Cola upgraded ⭐");
     update();
   }
 }
 
 /* UPDATE */
 function update(){
-  document.getElementById("allTime").innerText = allTime;
+  document.getElementById("allTime").innerText = Math.floor(allTime);
   document.getElementById("prestige").innerText = prestigeLevel;
   updateBoard();
 }
