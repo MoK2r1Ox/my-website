@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥤 Cola Prestige | Unlock New Upgrades</title>
+    <title>🥤 Galaxy Cola Clicker | Anti-AutoClicker & Prestige</title>
     <style>
         * {
             user-select: none;
@@ -13,25 +13,25 @@
         body {
             margin: 0;
             font-family: 'Segoe UI', 'Poppins', Arial, sans-serif;
-            background: radial-gradient(circle at 30% 20%, #2c1a0c, #0f0702);
+            background: radial-gradient(circle at 30% 20%, #0a0f1f, #020408);
             color: white;
             overflow-x: hidden;
             min-height: 100vh;
             transition: background 0.4s ease;
         }
 
-        /* Prestige background themes */
-        body.prestige-0 { background: radial-gradient(circle at 30% 20%, #3e1a0a, #1a0a02); }
-        body.prestige-1 { background: radial-gradient(circle at 70% 40%, #5e2a18, #200d03); box-shadow: inset 0 0 80px rgba(200,80,30,0.2); }
-        body.prestige-2 { background: radial-gradient(circle at 20% 80%, #1a3f2c, #0a1f12); box-shadow: inset 0 0 100px rgba(0,255,200,0.1); }
-        body.prestige-3 { background: radial-gradient(circle at 50% 50%, #4a2c1a, #221105); box-shadow: inset 0 0 120px rgba(255,215,0,0.25); }
+        /* Prestige cosmic themes */
+        body.prestige-0 { background: radial-gradient(circle at 30% 20%, #1a1a2e, #0a0a1a); }
+        body.prestige-1 { background: radial-gradient(circle at 70% 40%, #2a1a3e, #0e0a1f); box-shadow: inset 0 0 100px rgba(156, 80, 255, 0.2); }
+        body.prestige-2 { background: radial-gradient(circle at 20% 80%, #0a2a3a, #021018); box-shadow: inset 0 0 120px rgba(0, 200, 255, 0.2); }
+        body.prestige-3 { background: radial-gradient(circle at 50% 50%, #2a2a0a, #1a1a02); box-shadow: inset 0 0 150px rgba(255, 215, 0, 0.3); }
 
         /* HUD */
         #hud {
             position: fixed;
             top: 15px;
             left: 20px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             backdrop-filter: blur(10px);
             padding: 8px 20px;
             border-radius: 60px;
@@ -45,7 +45,7 @@
             position: fixed;
             top: 15px;
             right: 20px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             backdrop-filter: blur(10px);
             padding: 8px 20px;
             border-radius: 60px;
@@ -58,7 +58,7 @@
             position: fixed;
             top: 85px;
             left: 20px;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             backdrop-filter: blur(8px);
             padding: 8px 20px;
             border-radius: 40px;
@@ -74,7 +74,7 @@
             position: fixed;
             top: 85px;
             right: 20px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             backdrop-filter: blur(8px);
             padding: 6px 18px;
             border-radius: 40px;
@@ -162,10 +162,7 @@
             border-radius: 28px;
             margin: 8px 0;
         }
-        .prestige-highlight {
-            color: #ffcc88;
-            font-weight: bold;
-        }
+        .prestige-highlight { color: #ffcc88; font-weight: bold; }
         .float {
             position: fixed;
             font-weight: bold;
@@ -195,11 +192,27 @@
             50% { transform: scale(1.08); }
             100% { transform: scale(1); }
         }
-        .locked-notice {
-            font-size: 0.8rem;
-            color: #ffaa88;
-            text-align: center;
+        .warning-popup {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444dd;
+            backdrop-filter: blur(12px);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            z-index: 400;
+            animation: fadeOut 2s forwards;
+            pointer-events: none;
+            font-size: 0.9rem;
         }
+        @keyframes fadeOut {
+            0% { opacity: 1; bottom: 30px; }
+            70% { opacity: 1; }
+            100% { opacity: 0; bottom: 80px; visibility: hidden; }
+        }
+        .locked-notice { font-size: 0.8rem; color: #ffaa88; text-align: center; }
     </style>
 </head>
 <body class="prestige-0">
@@ -218,7 +231,7 @@
     <button class="menu-btn" onclick="openPanel('settingsPanel')">⚙️ SETTINGS</button>
 </div>
 
-<!-- UPGRADES PANEL - Shows new upgrades after prestige -->
+<!-- UPGRADES PANEL -->
 <div id="shopPanel" class="panel">
     <h3>🍫 CLICKER UPGRADES</h3>
     <button onclick="buyClickPower()">🔨 +1 Base Click (Cost: <span id="clickCost">10</span>)</button>
@@ -229,20 +242,19 @@
     <button onclick="buyBottler()">🏭 Bottling Plant +8/sec (Cost: <span id="factoryCost">220</span>)</button>
     <button onclick="buyMegaTank()">🌀 Mega Tank +50/sec (Cost: <span id="megaCost">1200</span>)</button>
     
-    <!-- PRESTIGE EXCLUSIVE UPGRADES (appear only after unlocking each tier) -->
     <hr id="prestigeUpgradeDivider" style="display: none;">
     <div id="prestigeUpgradesContainer">
-        <h3 id="prestigeUpgradeTitle" style="display: none;">✨ PRESTIGE LEGACY UPGRADES</h3>
-        <button id="prestigeUpgrade1" style="display: none; background: #5e3a2a;" onclick="buyPrestigeUpgrade(1)">🌟 Tier1 Relic: +15% Global (Cost: <span id="prestigeUpgrade1Cost">800</span>)</button>
-        <button id="prestigeUpgrade2" style="display: none; background: #6a4e3a;" onclick="buyPrestigeUpgrade(2)">💎 Tier2 Relic: +25% Global (Cost: <span id="prestigeUpgrade2Cost">5000</span>)</button>
-        <button id="prestigeUpgrade3" style="display: none; background: #8a6a3a;" onclick="buyPrestigeUpgrade(3)">👑 Tier3 Relic: +50% Global (Cost: <span id="prestigeUpgrade3Cost">25000</span>)</button>
+        <h3 id="prestigeUpgradeTitle" style="display: none;">✨ COSMIC LEGACY UPGRADES</h3>
+        <button id="prestigeUpgrade1" style="display: none; background: #5e3a6a;" onclick="buyPrestigeUpgrade(1)">🌌 Galaxy Relic: +15% Global (Cost: <span id="prestigeUpgrade1Cost">800</span>)</button>
+        <button id="prestigeUpgrade2" style="display: none; background: #2a5f6a;" onclick="buyPrestigeUpgrade(2)">💫 Nebula Core: +25% Global (Cost: <span id="prestigeUpgrade2Cost">5000</span>)</button>
+        <button id="prestigeUpgrade3" style="display: none; background: #8a6a2a;" onclick="buyPrestigeUpgrade(3)">👑 Stellar Crown: +50% Global (Cost: <span id="prestigeUpgrade3Cost">25000</span>)</button>
     </div>
     <button class="close-panel" onclick="closeAllPanels()">✖ CLOSE</button>
 </div>
 
-<!-- PRESTIGE PANEL: Show only the next available prestige with clear description -->
+<!-- PRESTIGE PANEL: Show only current next tier with COOL names -->
 <div id="prestigePanel" class="panel">
-    <h3>🌟 PRESTIGE - UNLOCK NEW POWER</h3>
+    <h3>🌟 PRESTIGE - COSMIC EVOLUTION</h3>
     <div id="prestigeInfo" class="prestige-card">
         <div id="prestigeDescription"></div>
         <button id="prestigeActionBtn" onclick="performPrestige()" style="margin-top: 12px; background: #c97e3a;">✨ PRESTIGE NOW</button>
@@ -259,7 +271,7 @@
     <p>🔊 Master Volume</p>
     <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.3">
     <hr>
-    <p><em>Streak = +1% per click, max 100% at 100 clicks!</em></p>
+    <p><em>Streak = +1% per click, max 100%!</em><br>⚡ Anti-AutoClicker active: Too fast clicks trigger cooldown!</p>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
@@ -277,12 +289,12 @@
     let bottlerCount = 0;
     let megaTankCount = 0;
     
-    // Prestige system: tier 0,1,2,3
+    // Prestige system: tier 0,1,2,3 with COOL NAMES
     let prestigeTier = 0;
-    let globalBonusPercent = 0;     // cumulative % from prestige (30% per tier)
+    let globalBonusPercent = 0;
     
-    // Prestige-exclusive upgrades (each unlockable only after reaching that prestige tier)
-    let prestigeUpgradeBought = [false, false, false]; // index 1,2,3
+    // Prestige-exclusive upgrades
+    let prestigeUpgradeBought = [false, false, false];
     let prestigeUpgradeCost = [0, 800, 5000, 25000];
     
     // Streak system
@@ -298,6 +310,46 @@
     let bottlerCost = 220;
     let megaCost = 1200;
     
+    // ---------- ANTI AUTO-CLICKER SYSTEM ----------
+    let clickTimestamps = [];       // store last 8 click timestamps
+    let isClickLocked = false;
+    let clickLockTimer = null;
+    const MAX_CLICKS_PER_SECOND = 12;    // max 12 clicks per second (human-like)
+    const LOCK_DURATION = 1800;          // lock for 1.8 seconds if detected
+    
+    function antiAutoClickerCheck() {
+        const now = Date.now();
+        clickTimestamps.push(now);
+        // keep only last 15 clicks
+        if(clickTimestamps.length > 15) clickTimestamps.shift();
+        
+        // count clicks in last 1000ms
+        let recent = clickTimestamps.filter(t => (now - t) <= 1000);
+        if(recent.length > MAX_CLICKS_PER_SECOND) {
+            if(!isClickLocked) {
+                isClickLocked = true;
+                showWarningMessage("⚠️ AUTO-CLICKER DETECTED! Click locked for 1.8s ⚠️");
+                if(clickLockTimer) clearTimeout(clickLockTimer);
+                clickLockTimer = setTimeout(() => {
+                    isClickLocked = false;
+                    clickTimestamps = []; // reset history after lock
+                    showWarningMessage("🔓 Click unlocked! Play fair 🥤");
+                }, LOCK_DURATION);
+                return false;
+            }
+            return false;
+        }
+        return true;
+    }
+    
+    function showWarningMessage(msg) {
+        let div = document.createElement("div");
+        div.className = "warning-popup";
+        div.innerText = msg;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 2200);
+    }
+    
     // Audio
     let musicOn = true;
     let sfxOn = true;
@@ -307,7 +359,7 @@
     music.volume = volume;
     
     function playClickSound() {
-        if(!sfxOn) return;
+        if(!sfxOn || isClickLocked) return;
         let snd = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c1b6d4b4d4.mp3");
         snd.volume = volume;
         snd.play().catch(e=>{});
@@ -320,7 +372,6 @@
     }
     music.play().catch(()=>console.log("click to enable music"));
     
-    // Helper: total global multiplier = 1 + (globalBonusPercent/100) + prestigeUpgrade bonuses
     function getTotalGlobalMultiplier() {
         let bonus = globalBonusPercent;
         if(prestigeUpgradeBought[1]) bonus += 15;
@@ -343,8 +394,8 @@
         return auto;
     }
     
-    // Streak logic: each click = +1% up to 100%
     function updateStreakOnClick() {
+        if(isClickLocked) return;
         if(currentStreak < 100) {
             currentStreak++;
             streakBonusPercent = currentStreak;
@@ -364,7 +415,7 @@
                 let preserved = Math.floor(currentStreak * 0.4);
                 currentStreak = preserved;
                 streakBonusPercent = currentStreak;
-                showFloatingText(`🛡️ Streak Saver! Streak → ${currentStreak}%`, window.innerWidth/2, 80);
+                showFloatingText(`🛡️ Streak Saver! → ${currentStreak}%`, window.innerWidth/2, 80);
             } else {
                 currentStreak = 0;
                 streakBonusPercent = 0;
@@ -378,7 +429,21 @@
         idleTimeout = setTimeout(() => resetStreakFromIdle(), 5200);
     }
     
-    // UI update with prestige visibility rules
+    // Cola name based on prestige tier (Galaxy, Nebula, Stellar, Cosmic)
+    function getColaName() {
+        if(prestigeTier === 0) return "🥤 Classic Cola";
+        if(prestigeTier === 1) return "🌌 Galaxy Cola";
+        if(prestigeTier === 2) return "💫 Nebula Cola";
+        return "👑 Stellar Cola";
+    }
+    
+    function getColaEmoji() {
+        if(prestigeTier === 0) return "🥤";
+        if(prestigeTier === 1) return "🌌";
+        if(prestigeTier === 2) return "💫";
+        return "👑";
+    }
+    
     function updateUI() {
         document.getElementById("colaCount").innerText = Math.floor(cola);
         document.getElementById("allTime").innerText = Math.floor(totalAllTime);
@@ -393,7 +458,6 @@
         document.getElementById("factoryCost").innerText = bottlerCost;
         document.getElementById("megaCost").innerText = megaCost;
         
-        // Show prestige upgrades based on tier reached
         let divider = document.getElementById("prestigeUpgradeDivider");
         let title = document.getElementById("prestigeUpgradeTitle");
         let btn1 = document.getElementById("prestigeUpgrade1");
@@ -407,30 +471,24 @@
             if(prestigeUpgradeBought[1]) btn1.disabled = true;
             else btn1.disabled = false;
             document.getElementById("prestigeUpgrade1Cost").innerText = prestigeUpgradeCost[1];
-        } else {
-            btn1.style.display = "none";
-        }
+        } else { btn1.style.display = "none"; }
+        
         if(prestigeTier >= 2) {
             btn2.style.display = "block";
             if(prestigeUpgradeBought[2]) btn2.disabled = true;
             else btn2.disabled = false;
             document.getElementById("prestigeUpgrade2Cost").innerText = prestigeUpgradeCost[2];
-        } else {
-            btn2.style.display = "none";
-        }
+        } else { btn2.style.display = "none"; }
+        
         if(prestigeTier >= 3) {
             btn3.style.display = "block";
             if(prestigeUpgradeBought[3]) btn3.disabled = true;
             else btn3.disabled = false;
             document.getElementById("prestigeUpgrade3Cost").innerText = prestigeUpgradeCost[3];
-        } else {
-            btn3.style.display = "none";
-        }
+        } else { btn3.style.display = "none"; }
         
-        // Prestige panel dynamic description (only show current available prestige)
         updatePrestigePanelDescription();
         
-        // Background theme based on tier
         let bodyClass = document.body;
         bodyClass.classList.remove("prestige-0", "prestige-1", "prestige-2", "prestige-3");
         if(prestigeTier === 0) bodyClass.classList.add("prestige-0");
@@ -438,77 +496,69 @@
         else if(prestigeTier === 2) bodyClass.classList.add("prestige-2");
         else if(prestigeTier === 3) bodyClass.classList.add("prestige-3");
         
-        // Cola emoji evolution
-        let colaEmoji = document.getElementById("cola");
-        if(prestigeTier === 0) colaEmoji.innerText = "🥤";
-        else if(prestigeTier === 1) colaEmoji.innerText = "🍒";
-        else if(prestigeTier === 2) colaEmoji.innerText = "💎";
-        else if(prestigeTier === 3) colaEmoji.innerText = "👑";
+        let colaDiv = document.getElementById("cola");
+        colaDiv.innerText = getColaEmoji();
+        document.title = `${getColaName()} Clicker - ${Math.floor(cola)} cola`;
     }
     
-    // Show only the next prestige (you see Prestige 1 until you do it, then Prestige 2 appears, etc.)
     function updatePrestigePanelDescription() {
         let descDiv = document.getElementById("prestigeDescription");
         let actionBtn = document.getElementById("prestigeActionBtn");
         let warningDiv = document.getElementById("prestigeWarning");
         
         if(prestigeTier === 0) {
-            descDiv.innerHTML = `<span class="prestige-highlight">🥤 PRESTIGE 1 (Cherry Cola)</span><br>
-            ➤ You will get <strong>+30% permanent cola bonus</strong> forever!<br>
-            ➤ Unlock <strong>3 new powerful upgrades</strong> in the shop!<br>
-            ➤ Cola evolves into 🍒<br>
+            descDiv.innerHTML = `<span class="prestige-highlight">🌌 PRESTIGE 1: GALAXY COLA</span><br>
+            ➤ Become <strong>Galaxy Cola</strong>! +30% permanent bonus!<br>
+            ➤ Unlock <strong>3 cosmic upgrades</strong> in shop!<br>
+            ➤ Cola evolves into 🌌<br>
             ➤ Requirement: 10,000 total cola<br>
-            <span style="color:#ffaa66;">⚠️ You will lose ALL upgrades and cola, but keep total cola count!</span>`;
+            <span style="color:#ffaa66;">⚠️ Reset all upgrades, keep total & bonus!</span>`;
             if(totalAllTime >= 10000) {
                 actionBtn.disabled = false;
-                warningDiv.innerText = "✅ Ready to Prestige! You'll gain +30% permanent bonus.";
+                warningDiv.innerText = "✅ Ready to become GALAXY COLA! +30% bonus.";
             } else {
                 actionBtn.disabled = true;
-                warningDiv.innerText = `🔒 Need ${10000 - totalAllTime} more total cola to unlock Prestige 1.`;
+                warningDiv.innerText = `🔒 Need ${10000 - totalAllTime} more total cola.`;
             }
         } 
         else if(prestigeTier === 1) {
-            descDiv.innerHTML = `<span class="prestige-highlight">💎 PRESTIGE 2 (Diamond Cola)</span><br>
-            ➤ You will get <strong>+30% permanent cola bonus</strong> (stacking, total +60%)!<br>
-            ➤ Unlock <strong>3 more new upgrades</strong> (Tier 2 relics)!<br>
-            ➤ Cola evolves into 💎<br>
-            ➤ Requirement: 100,000 total cola<br>
-            <span style="color:#ffaa66;">⚠️ You will lose ALL upgrades and cola again, but keep total cola count!</span>`;
+            descDiv.innerHTML = `<span class="prestige-highlight">💫 PRESTIGE 2: NEBULA COLA</span><br>
+            ➤ Evolve to <strong>Nebula Cola</strong>! +30% more (total +60%)!<br>
+            ➤ Unlock <strong>Nebula-tier relics</strong>!<br>
+            ➤ Cola becomes 💫<br>
+            ➤ Requirement: 100,000 total cola<br>`;
             if(totalAllTime >= 100000) {
                 actionBtn.disabled = false;
-                warningDiv.innerText = "✅ Ready for Prestige 2! +30% more bonus (total +60%)";
+                warningDiv.innerText = "✅ Ready for NEBULA COLA! +30% stacking.";
             } else {
                 actionBtn.disabled = true;
-                warningDiv.innerText = `🔒 Need ${100000 - totalAllTime} more total cola for Prestige 2.`;
+                warningDiv.innerText = `🔒 Need ${100000 - totalAllTime} more total cola.`;
             }
         }
         else if(prestigeTier === 2) {
-            descDiv.innerHTML = `<span class="prestige-highlight">👑 PRESTIGE 3 (Golden Cola)</span><br>
-            ➤ You will get <strong>+30% permanent cola bonus</strong> (total +90%)!<br>
-            ➤ Unlock <strong>3 final ultimate upgrades</strong> (Tier 3 relics)!<br>
-            ➤ Cola evolves into 👑<br>
-            ➤ Requirement: 1,000,000 total cola<br>
-            <span style="color:#ffaa66;">⚠️ Final Prestige! Massive power!</span>`;
+            descDiv.innerHTML = `<span class="prestige-highlight">👑 PRESTIGE 3: STELLAR COLA</span><br>
+            ➤ Ascend to <strong>Stellar Cola</strong>! +30% more (total +90%)!<br>
+            ➤ Unlock <strong>Stellar Crown upgrade</strong>!<br>
+            ➤ Cola becomes 👑<br>
+            ➤ Requirement: 1,000,000 total cola<br>`;
             if(totalAllTime >= 1000000) {
                 actionBtn.disabled = false;
-                warningDiv.innerText = "✅ ULTIMATE PRESTIGE READY! +30% final bonus.";
+                warningDiv.innerText = "✅ ULTIMATE PRESTIGE! Become STELLAR COLA.";
             } else {
                 actionBtn.disabled = true;
-                warningDiv.innerText = `🔒 Need ${1000000 - totalAllTime} more total cola for Prestige 3.`;
+                warningDiv.innerText = `🔒 Need ${1000000 - totalAllTime} more total cola.`;
             }
         }
         else {
-            descDiv.innerHTML = `<span class="prestige-highlight">🌟 MAX PRESTIGE ACHIEVED!</span><br>
-            You have reached the highest Prestige tier!<br>
-            Keep stacking upgrades and enjoy your +90% permanent bonus!<br>
-            👑 Golden Cola Master!`;
+            descDiv.innerHTML = `<span class="prestige-highlight">✨ COSMIC LEGEND</span><br>
+            You are <strong>Stellar Cola Master</strong>! Max prestige reached.<br>
+            Keep buying legacy upgrades! +90% permanent bonus!`;
             actionBtn.disabled = true;
-            actionBtn.innerText = "✨ MAXED";
-            warningDiv.innerText = "You are a Cola Legend!";
+            actionBtn.innerText = "🌟 MAXED";
+            warningDiv.innerText = "You rule the galaxy!";
         }
     }
     
-    // Perform Prestige (only current tier)
     function performPrestige() {
         let canPrestige = false;
         let newTier = 0;
@@ -521,10 +571,11 @@
             return;
         }
         
-        let confirmMsg = `✨ PRESTIGE TO TIER ${newTier}?\n\nYou will gain +30% permanent bonus (total +${(globalBonusPercent+30)}%).\nYou will lose all cola, click upgrades, auto producers, and streak upgrades.\nBut you will unlock new powerful legacy upgrades!\n\nProceed?`;
-        if(!confirm(confirmMsg)) return;
+        let newBonus = globalBonusPercent + 30;
+        let newName = (newTier === 1) ? "GALAXY COLA" : (newTier === 2) ? "NEBULA COLA" : "STELLAR COLA";
+        if(!confirm(`✨ PRESTIGE TO ${newName}?\n\n+30% permanent bonus (total +${newBonus}%).\nYou lose all cola, click upgrades, auto producers.\nBut unlock cosmic relics!\n\nContinue?`)) return;
         
-        // Reset all progress
+        // Reset everything except prestige tier & bonus
         cola = 0;
         baseClickPower = 1;
         clickUpgradeLevel = 0;
@@ -541,21 +592,19 @@
         currentStreak = 0;
         streakBonusPercent = 0;
         
-        // Increase global bonus by 30%
         globalBonusPercent += 30;
         prestigeTier = newTier;
         
         playUpgradeSound();
         updateUI();
         closeAllPanels();
-        showFloatingText(`🌟 PRESTIGE ${newTier} ACHIEVED! +30% PERMANENT BONUS!`, window.innerWidth/2, 100);
+        showFloatingText(`🌟 PRESTIGE ${newTier}: ${newName} ACHIEVED! +30% PERMANENT BONUS!`, window.innerWidth/2, 100);
         resetIdleTimer();
     }
     
-    // Buy prestige-exclusive upgrades (appear only after unlocking tier)
     function buyPrestigeUpgrade(tier) {
         if(prestigeUpgradeBought[tier]) {
-            showFloatingText("Already bought this relic!",0,0);
+            showFloatingText("Already own this relic!",0,0);
             return;
         }
         let cost = prestigeUpgradeCost[tier];
@@ -563,14 +612,14 @@
             cola -= cost;
             prestigeUpgradeBought[tier] = true;
             playUpgradeSound();
-            showFloatingText(`✨ ${tier==1?"Tier1":tier==2?"Tier2":"Tier3"} Relic acquired! +${tier==1?15:tier==2?25:50}% global bonus!`,0,0);
+            let bonusText = tier===1?"+15%":tier===2?"+25%":"+50%";
+            showFloatingText(`✨ Cosmic Relic acquired! ${bonusText} global bonus!`,0,0);
             updateUI();
         } else {
-            showFloatingText(`❌ Need ${cost} cola for this relic!`,0,0);
+            showFloatingText(`❌ Need ${cost} cola!`,0,0);
         }
     }
     
-    // Standard upgrades
     function buyClickPower() {
         if(cola >= clickCost) {
             cola -= clickCost;
@@ -641,6 +690,12 @@
     }
     
     function onColaClick(e) {
+        if(isClickLocked) {
+            showWarningMessage("⛔ Click locked by anti-cheat! Wait...");
+            return;
+        }
+        if(!antiAutoClickerCheck()) return;
+        
         let gain = getFinalClickPower();
         cola += gain;
         totalAllTime += gain;
@@ -657,7 +712,7 @@
     
     setInterval(() => {
         let income = getAutoIncome();
-        if(income > 0) {
+        if(income > 0 && !isClickLocked) {
             cola += income;
             totalAllTime += income;
             updateUI();
