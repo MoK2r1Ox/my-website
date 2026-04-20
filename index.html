@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥤 COLA TYCOON | Prestige & Streak System</title>
+    <title>🥤 Cola Streak Clicker | 100% Max Streak Bonus</title>
     <style>
         * {
             user-select: none;
@@ -13,25 +13,25 @@
         body {
             margin: 0;
             font-family: 'Segoe UI', 'Poppins', 'Arial', sans-serif;
-            background: radial-gradient(circle at 30% 20%, #3e1a0a, #1a0a02);
+            background: radial-gradient(circle at 30% 20%, #2c1a0c, #0f0702);
             color: white;
             overflow-x: hidden;
             min-height: 100vh;
             transition: background 0.4s ease;
         }
 
-        /* COLA THEME BACKGROUND VARIATIONS (dynamic via prestige) */
-        body.cola-bg-0 { background: radial-gradient(circle at 30% 20%, #3e1a0a, #1a0a02); }
-        body.cola-bg-1 { background: radial-gradient(circle at 70% 40%, #6b2e1a, #2c0e02); box-shadow: inset 0 0 80px rgba(200,80,30,0.2); }
-        body.cola-bg-2 { background: radial-gradient(circle at 20% 80%, #1a3f2c, #0a1f12); box-shadow: inset 0 0 100px rgba(0,255,200,0.1); }
-        body.cola-bg-3 { background: radial-gradient(circle at 50% 50%, #4a2c1a, #221105); box-shadow: inset 0 0 120px rgba(255,215,0,0.25); }
+        /* Cola-themed backgrounds for prestige tiers */
+        body.prestige-0 { background: radial-gradient(circle at 30% 20%, #3e1a0a, #1a0a02); }
+        body.prestige-1 { background: radial-gradient(circle at 70% 40%, #6b2e1a, #2c0e02); box-shadow: inset 0 0 80px rgba(200,80,30,0.2); }
+        body.prestige-2 { background: radial-gradient(circle at 20% 80%, #1a3f2c, #0a1f12); box-shadow: inset 0 0 100px rgba(0,255,200,0.1); }
+        body.prestige-3 { background: radial-gradient(circle at 50% 50%, #4a2c1a, #221105); box-shadow: inset 0 0 120px rgba(255,215,0,0.25); }
 
         /* HUD */
         #hud {
             position: fixed;
             top: 15px;
             left: 20px;
-            background: rgba(0,0,0,0.65);
+            background: rgba(0,0,0,0.7);
             backdrop-filter: blur(10px);
             padding: 8px 20px;
             border-radius: 60px;
@@ -45,7 +45,7 @@
             position: fixed;
             top: 15px;
             right: 20px;
-            background: rgba(0,0,0,0.65);
+            background: rgba(0,0,0,0.7);
             backdrop-filter: blur(10px);
             padding: 8px 20px;
             border-radius: 60px;
@@ -58,16 +58,22 @@
             position: fixed;
             top: 85px;
             left: 20px;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.8);
             backdrop-filter: blur(8px);
-            padding: 6px 18px;
+            padding: 8px 20px;
             border-radius: 40px;
             font-weight: bold;
-            font-size: 0.95rem;
+            font-size: 1rem;
             color: #ffdd99;
-            border-left: 3px solid gold;
+            border-left: 3px solid #ffaa33;
             font-family: monospace;
             z-index: 100;
+            box-shadow: 0 0 12px rgba(255,170,0,0.3);
+        }
+        #streakPercent {
+            font-size: 1.2rem;
+            color: #ffcc55;
+            font-weight: bold;
         }
         #prestigeBadge {
             position: fixed;
@@ -117,8 +123,8 @@
         #cola {
             font-size: 210px;
             cursor: pointer;
-            filter: drop-shadow(0 0 20px rgba(255,100,30,0.7));
-            transition: transform 0.08s cubic-bezier(0.2, 1.2, 0.8, 1);
+            filter: drop-shadow(0 0 25px rgba(255,100,30,0.8));
+            transition: transform 0.07s cubic-bezier(0.2, 1.2, 0.8, 1);
         }
         #cola:active { transform: scale(0.92); }
         .panel {
@@ -162,8 +168,8 @@
             margin: 6px 0;
         }
         .hidden-prestige {
-            opacity: 0.6;
-            filter: grayscale(0.3);
+            opacity: 0.5;
+            filter: grayscale(0.4);
         }
         .float {
             position: fixed;
@@ -179,19 +185,31 @@
             0% { opacity: 1; transform: translateY(0) scale(0.8);}
             100% { opacity: 0; transform: translateY(-130px) scale(1.5);}
         }
-        .streak-flash { animation: pulseGold 0.2s ease-out; }
-        @keyframes pulseGold {
-            0% { text-shadow: 0 0 0px gold; }
-            100% { text-shadow: 0 0 16px #ffcc44; }
+        .streak-flash {
+            animation: pulseGold 0.2s ease-out;
         }
-        #streakMulti { font-weight: bold; color: #ffdd88; }
+        @keyframes pulseGold {
+            0% { text-shadow: 0 0 0px gold; background: rgba(255,200,0,0);}
+            100% { text-shadow: 0 0 18px #ffcc44; background: rgba(255,200,0,0.2);}
+        }
+        .click-effect {
+            animation: colaPop 0.1s ease-out;
+        }
+        @keyframes colaPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
-<body class="cola-bg-0">
+<body class="prestige-0">
 
 <div id="hud">🥤 COLA: <span id="colaCount">0</span></div>
 <div id="totalDisplay">📈 TOTAL: <span id="allTime">0</span></div>
-<div id="streakBox">🔥 STREAK: <span id="streakValue">0</span> &nbsp;| ✨ MULTI: <span id="streakMulti">1.00</span>x</div>
+<div id="streakBox">
+    🔥 STREAK: <span id="streakValue">0</span> / 100 &nbsp;| 
+    ✨ BONUS: +<span id="streakPercent">0</span>%
+</div>
 <div id="prestigeBadge">🏆 PRESTIGE <span id="prestigeLevel">0</span> &nbsp;| 💪 BONUS <span id="prestigeBonus">+0%</span></div>
 
 <div class="menu-bar">
@@ -203,8 +221,8 @@
 <!-- UPGRADES PANEL -->
 <div id="shopPanel" class="panel">
     <h3>🍫 CLICKER UPGRADES</h3>
-    <button onclick="buyClickPower()">🔨 +1 Click Power (Cost: <span id="clickCost">10</span>)</button>
-    <button onclick="buyQuantum()">⚛️ Quantum Burst +50 (Cost: <span id="quantumCost">450</span>)</button>
+    <button onclick="buyClickPower()">🔨 +1 Base Click (Cost: <span id="clickCost">10</span>)</button>
+    <button onclick="buyQuantum()">⚛️ Quantum Core +50 (Cost: <span id="quantumCost">450</span>)</button>
     <hr>
     <h3>🏭 AUTO PRODUCERS</h3>
     <button onclick="buySiphon()">🥤 Auto Siphon +1/sec (Cost: <span id="autoCost">30</span>)</button>
@@ -212,11 +230,11 @@
     <button onclick="buyMegaTank()">🌀 Mega Tank +50/sec (Cost: <span id="megaCost">1200</span>)</button>
     <hr>
     <h3>🛡️ STREAK UPGRADE</h3>
-    <button onclick="buyStreakSaver()">💪 Streak Saver (400) - keep 30% streak after idle</button>
+    <button onclick="buyStreakSaver()">💪 Streak Saver (500) - keep 40% streak after idle</button>
     <button class="close-panel" onclick="closeAllPanels()">✖ CLOSE</button>
 </div>
 
-<!-- PRESTIGE PANEL (visible progressively) -->
+<!-- PRESTIGE PANEL (progressive unlock) -->
 <div id="prestigePanel" class="panel">
     <h3>🌟 PRESTIGE REALMS (Cola Evolution)</h3>
     <div id="prestige1Div" class="prestige-tier">
@@ -239,13 +257,13 @@
 
 <!-- SETTINGS PANEL -->
 <div id="settingsPanel" class="panel">
-    <h3>🎧 AUDIO & COLA THEME</h3>
+    <h3>🎧 AUDIO & THEME</h3>
     <button onclick="toggleMusic()">🎵 Toggle Music</button>
     <button onclick="toggleSFX()">🔊 Toggle SFX</button>
     <p>🔊 Master Volume</p>
     <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.3">
     <hr>
-    <p><em>Cola changes with prestige! 🥤→🍒→💎→👑</em></p>
+    <p><em>Streak = +1% per click, max 100% at 100 streak!</em></p>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
@@ -254,26 +272,27 @@
 </div>
 
 <script>
-    // ------------------- GAME CORE -------------------
+    // ------------------- GAME STATE -------------------
     let cola = 0;
     let totalAllTime = 0;
-    let clickPowerLevel = 1;      // base from upgrades
-    let quantumActive = false;
-    let autoPerSec = 0;
+    let baseClickPower = 1;          // base from upgrades
+    let quantumActive = false;        // +50 click power upgrade
     let autoSiphonCount = 0;
     let bottlerCount = 0;
     let megaTankCount = 0;
     
-    // Prestige
+    // Prestige system
     let prestigeTier = 0;      // 0,1,2,3
-    let permanentBonus = 1.0;  // multiplier
+    let permanentBonus = 1.0;  // global multiplier
     
-    // Streak system: each click increases multiplier from 1.0 up to 1.5 (at 100 streak)
+    // STREAK SYSTEM: each click = +1% bonus, max 100% (which means x2 multiplier)
+    // Every click adds 1% to cola gain, up to 100% max (double damage)
     let currentStreak = 0;
-    let streakMult = 1.0;
+    let streakBonusPercent = 0;   // 0 to 100
     let streakSaverOwned = false;
     
-    // dynamic costs
+    // Upgrade costs
+    let clickUpgradeLevel = 0;
     let clickCost = 10;
     let quantumCost = 450;
     let siphonCost = 30;
@@ -300,14 +319,15 @@
         snd.volume = volume;
         snd.play().catch(e=>{});
     }
-    music.play().catch(()=>console.log("interact first"));
+    music.play().catch(()=>console.log("click to enable music"));
     
-    // Helper: final click power = (base + quantum bonus) * streakMulti * permanentBonus
+    // Helper: Get final click power
+    // Formula: (baseClickPower + quantumBonus) * (1 + streakBonusPercent/100) * permanentBonus
     function getFinalClickPower() {
-        let base = clickPowerLevel;
+        let base = baseClickPower;
         if(quantumActive) base += 50;
-        let withStreak = base * streakMult;
-        let final = Math.floor(withStreak * permanentBonus);
+        let streakMultiplier = 1 + (streakBonusPercent / 100);
+        let final = Math.floor(base * streakMultiplier * permanentBonus);
         return final < 1 ? 1 : final;
     }
     
@@ -317,64 +337,63 @@
         return auto;
     }
     
-    // Streak logic: each click -> increase streak, multiplier scales from 1.0 to 1.5 exactly
+    // Streak logic: every click increases streak by 1, each point gives +1% bonus (max 100% at 100 streak)
     function updateStreakOnClick() {
-        currentStreak++;
-        if(currentStreak > 100) currentStreak = 100;
-        // multiplier: at 0 streak -> 1.0, at 100 streak -> 1.5 (linear)
-        let ratio = currentStreak / 100;
-        streakMult = 1.0 + (ratio * 0.5);
-        if(streakMult > 1.5) streakMult = 1.5;
-        if(streakMult < 1.0) streakMult = 1.0;
-        // visual flash
+        if(currentStreak < 100) {
+            currentStreak++;
+            streakBonusPercent = currentStreak;  // 1% per click, max 100%
+            if(streakBonusPercent > 100) streakBonusPercent = 100;
+        } else {
+            streakBonusPercent = 100;
+        }
+        // Visual flash on streak box
         let sb = document.getElementById("streakBox");
         sb.classList.add("streak-flash");
         setTimeout(()=> sb.classList.remove("streak-flash"), 200);
     }
     
-    // IDLE RESET (after 5 seconds without click)
+    // IDLE STREAK RESET (after 5 seconds without clicking)
     let idleTimeout;
-    function resetIdleStreak() {
+    function resetStreakFromIdle() {
         if(currentStreak > 0) {
             if(streakSaverOwned) {
-                let preserved = Math.floor(currentStreak * 0.3);
+                let preserved = Math.floor(currentStreak * 0.4);
                 if(preserved < 0) preserved = 0;
                 currentStreak = preserved;
-                showFloatingText(`🛡️ Streak Saver! streak → ${currentStreak}`, window.innerWidth/2, 80);
+                streakBonusPercent = currentStreak;
+                showFloatingText(`🛡️ Streak Saver! Streak → ${currentStreak}% bonus`, window.innerWidth/2, 80);
             } else {
                 currentStreak = 0;
-                showFloatingText(`💔 Streak broken!`, window.innerWidth/2, 80);
+                streakBonusPercent = 0;
+                showFloatingText(`💔 Streak broken! Bonus reset to 0%`, window.innerWidth/2, 80);
             }
-            let ratio = currentStreak / 100;
-            streakMult = 1.0 + (ratio * 0.5);
-            if(streakMult > 1.5) streakMult = 1.5;
             updateUI();
         }
     }
     
     function resetIdleTimer() {
         if(idleTimeout) clearTimeout(idleTimeout);
-        idleTimeout = setTimeout(() => resetIdleStreak(), 5200);
+        idleTimeout = setTimeout(() => resetStreakFromIdle(), 5200);
     }
     
-    // UI update and background + prestige visibility
+    // UI Updater with progressive prestige visibility
     function updateUI() {
         document.getElementById("colaCount").innerText = Math.floor(cola);
         document.getElementById("allTime").innerText = Math.floor(totalAllTime);
         document.getElementById("streakValue").innerText = currentStreak;
-        document.getElementById("streakMulti").innerText = streakMult.toFixed(2);
+        document.getElementById("streakPercent").innerText = streakBonusPercent;
         document.getElementById("prestigeLevel").innerText = prestigeTier;
         let bonusPercent = Math.round((permanentBonus - 1) * 100);
         document.getElementById("prestigeBonus").innerText = `+${bonusPercent}%`;
         
-        // update dynamic costs displays
+        // Upgrade costs display
         document.getElementById("clickCost").innerText = clickCost;
         document.getElementById("quantumCost").innerText = quantumCost;
         document.getElementById("autoCost").innerText = siphonCost;
         document.getElementById("factoryCost").innerText = bottlerCost;
         document.getElementById("megaCost").innerText = megaCost;
         
-        // --- Show/Hide Prestige 2 & 3 based on progress ---
+        // Prestige progressive visibility (show 2nd after 1st, 3rd after 2nd)
         let p1Div = document.getElementById("prestige1Div");
         let p2Div = document.getElementById("prestige2Div");
         let p3Div = document.getElementById("prestige3Div");
@@ -382,10 +401,8 @@
         let p2Btn = document.getElementById("prestige2Btn");
         let p3Btn = document.getElementById("prestige3Btn");
         
-        // Prestige 1 always visible
         if(p1Btn) p1Btn.disabled = !(prestigeTier === 0 && totalAllTime >= 10000);
         
-        // Prestige 2 becomes visible (non-hidden) only after Prestige 1 is done (prestigeTier >=1)
         if(prestigeTier >= 1) {
             p2Div.classList.remove("hidden-prestige");
             if(p2Btn) p2Btn.disabled = !(prestigeTier === 1 && totalAllTime >= 100000);
@@ -394,7 +411,6 @@
             if(p2Btn) p2Btn.disabled = true;
         }
         
-        // Prestige 3 becomes visible after Prestige 2 is done (prestigeTier >=2)
         if(prestigeTier >= 2) {
             p3Div.classList.remove("hidden-prestige");
             if(p3Btn) p3Btn.disabled = !(prestigeTier === 2 && totalAllTime >= 1000000);
@@ -403,15 +419,15 @@
             if(p3Btn) p3Btn.disabled = true;
         }
         
-        // Dynamic background based on prestige + cola theme
+        // Dynamic background
         let bodyClass = document.body;
-        bodyClass.classList.remove("cola-bg-0", "cola-bg-1", "cola-bg-2", "cola-bg-3");
-        if(prestigeTier === 0) bodyClass.classList.add("cola-bg-0");
-        else if(prestigeTier === 1) bodyClass.classList.add("cola-bg-1");
-        else if(prestigeTier === 2) bodyClass.classList.add("cola-bg-2");
-        else if(prestigeTier === 3) bodyClass.classList.add("cola-bg-3");
+        bodyClass.classList.remove("prestige-0", "prestige-1", "prestige-2", "prestige-3");
+        if(prestigeTier === 0) bodyClass.classList.add("prestige-0");
+        else if(prestigeTier === 1) bodyClass.classList.add("prestige-1");
+        else if(prestigeTier === 2) bodyClass.classList.add("prestige-2");
+        else if(prestigeTier === 3) bodyClass.classList.add("prestige-3");
         
-        // change cola emoji by prestige
+        // Cola emoji by prestige
         let colaEmoji = document.getElementById("cola");
         if(prestigeTier === 0) colaEmoji.innerText = "🥤";
         else if(prestigeTier === 1) colaEmoji.innerText = "🍒";
@@ -431,7 +447,7 @@
         setTimeout(()=>f.remove(), 1000);
     }
     
-    // MAIN CLICK
+    // MAIN CLICK ACTION
     function onColaClick(e) {
         let gain = getFinalClickPower();
         cola += gain;
@@ -439,14 +455,20 @@
         updateStreakOnClick();
         resetIdleTimer();
         playClickSound();
-        let rect = document.getElementById("cola").getBoundingClientRect();
+        
+        // Visual feedback
+        let colaDiv = document.getElementById("cola");
+        colaDiv.classList.add("click-effect");
+        setTimeout(()=> colaDiv.classList.remove("click-effect"), 100);
+        
+        let rect = colaDiv.getBoundingClientRect();
         let cx = rect.left + rect.width/2;
         let cy = rect.top + rect.height/2;
-        showFloatingText(`+${gain}`, cx, cy-25);
+        showFloatingText(`+${gain} (${streakBonusPercent}% streak)`, cx, cy-25);
         updateUI();
     }
     
-    // AUTO INCOME
+    // AUTO INCOME LOOP
     setInterval(() => {
         let income = getAutoIncome();
         if(income > 0) {
@@ -460,21 +482,24 @@
     function buyClickPower() {
         if(cola >= clickCost) {
             cola -= clickCost;
-            clickPowerLevel++;
-            clickCost = Math.floor(10 + clickPowerLevel * 5);
+            baseClickPower++;
+            clickUpgradeLevel++;
+            clickCost = Math.floor(10 + baseClickPower * 5);
             playUpgradeSound();
             updateUI();
         } else showFloatingText("❌ Not enough cola!",0,0);
     }
+    
     function buyQuantum() {
         if(!quantumActive && cola >= quantumCost) {
             cola -= quantumCost;
             quantumActive = true;
             playUpgradeSound();
             updateUI();
-        } else if(quantumActive) showFloatingText("⚛️ Quantum already owned!",0,0);
-        else showFloatingText("❌ Need cola",0,0);
+        } else if(quantumActive) showFloatingText("⚛️ Quantum Core already owned!",0,0);
+        else showFloatingText("❌ Need " + quantumCost + " cola",0,0);
     }
+    
     function buySiphon() {
         if(cola >= siphonCost) {
             cola -= siphonCost;
@@ -484,6 +509,7 @@
             updateUI();
         } else showFloatingText("❌ Need cola",0,0);
     }
+    
     function buyBottler() {
         if(cola >= bottlerCost) {
             cola -= bottlerCost;
@@ -493,6 +519,7 @@
             updateUI();
         } else showFloatingText("❌ Need cola",0,0);
     }
+    
     function buyMegaTank() {
         if(cola >= megaCost) {
             cola -= megaCost;
@@ -502,18 +529,19 @@
             updateUI();
         } else showFloatingText("❌ Need cola",0,0);
     }
+    
     function buyStreakSaver() {
-        if(!streakSaverOwned && cola >= 400) {
-            cola -= 400;
+        if(!streakSaverOwned && cola >= 500) {
+            cola -= 500;
             streakSaverOwned = true;
             playUpgradeSound();
-            showFloatingText("🛡️ Streak Saver ACTIVE! (retain 30% streak)",0,0);
+            showFloatingText("🛡️ Streak Saver ACTIVE! Keep 40% streak after idle",0,0);
             updateUI();
         } else if(streakSaverOwned) showFloatingText("Already have Streak Saver!",0,0);
-        else showFloatingText("Need 400 cola",0,0);
+        else showFloatingText("Need 500 cola",0,0);
     }
     
-    // PRESTIGE (3 DIFFERENT TIERS)
+    // PRESTIGE (3 tiers with progressive reveal)
     function attemptPrestige(tier) {
         if(tier === 1 && prestigeTier === 0 && totalAllTime >= 10000) {
             confirmPrestige(1, 0.5);
@@ -530,9 +558,10 @@
         let msg = `✨ PRESTIGE TO TIER ${newTier}!\nYou will reset cola, upgrades, but keep permanent +${Math.round(bonusMulti*100)}% bonus.\nCola transforms! Continue?`;
         if(!confirm(msg)) return;
         
-        // reset all non-prestige progress
+        // Reset all non-prestige progress
         cola = 0;
-        clickPowerLevel = 1;
+        baseClickPower = 1;
+        clickUpgradeLevel = 0;
         quantumActive = false;
         autoSiphonCount = 0;
         bottlerCount = 0;
@@ -544,12 +573,10 @@
         megaCost = 1200;
         streakSaverOwned = false;
         currentStreak = 0;
-        streakMult = 1.0;
+        streakBonusPercent = 0;
         
         prestigeTier = newTier;
-        // permanent bonus: for tier1: 1.5x , tier2: 2.2x, tier3: 3.5x
-        let bonusValue = 1 + bonusMulti;
-        permanentBonus = bonusValue;
+        permanentBonus = 1 + bonusMulti;  // 1.5x, 2.2x, 3.5x
         
         playUpgradeSound();
         updateUI();
@@ -558,7 +585,7 @@
         resetIdleTimer();
     }
     
-    // UI PANELS
+    // PANEL CONTROLS
     function openPanel(id) {
         closeAllPanels();
         let panel = document.getElementById(id);
@@ -568,7 +595,7 @@
         document.querySelectorAll('.panel').forEach(p => p.style.display = "none");
     }
     
-    // AUDIO CONTROLS
+    // AUDIO
     function toggleMusic() {
         musicOn = !musicOn;
         if(musicOn) music.play().catch(e=>{});
@@ -590,6 +617,7 @@
         if(!e.target.closest('#cola')) resetIdleTimer();
     });
     
+    // Initialization
     resetIdleTimer();
     updateUI();
 </script>
