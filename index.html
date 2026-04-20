@@ -740,3 +740,97 @@
             else floatingText("❌",0,0);
         };
         window.buyMega = function() {
+            if(cola >= megaCost) { cola -= megaCost; megaTank++; megaCost = Math.floor(1200 + megaTank * 170); playUpgradeSound(); updateUI(); } 
+            else floatingText("❌",0,0);
+        };
+        
+        window.buyRelic = function(tier) {
+            if(relics[tier]) return;
+            let cost = tier===1?800: tier===2?5000:25000;
+            if(cola >= cost) {
+                cola -= cost;
+                relics[tier] = true;
+                playUpgradeSound();
+                floatingText(`✨ ${tier===1?"Galaxy":tier===2?"Nebula":"Stellar"} Relic acquired!`,0,0);
+                updateUI();
+            } else floatingText(`❌ Need ${cost} cola`,0,0);
+        };
+        
+        window.performRebirth = function() {
+            let can = false;
+            let newTier = 0;
+            if(rebirthLevel === 0 && totalAllTime >= 10000) { can = true; newTier = 1; }
+            else if(rebirthLevel === 1 && totalAllTime >= 100000) { can = true; newTier = 2; }
+            else if(rebirthLevel === 2 && totalAllTime >= 1000000) { can = true; newTier = 3; }
+            if(!can) { floatingText("❌ Rebirth locked",0,0); return; }
+            if(!confirm(`🌀 REBIRTH to ${newTier===1?"GALAXY COLA":newTier===2?"NEBULA COLA":"STELLAR COLA"}?\n+30% permanent bonus, reset all upgrades & cola.\nCola icon will EVOLVE!`)) return;
+            
+            // reset progress
+            cola = 0;
+            clickPower = 1;
+            quantumOwned = false;
+            autoSiphon = 0; factory = 0; megaTank = 0;
+            clickUpgradeLvl = 0;
+            clickCost = 10;
+            quantumCost = 450;
+            autoCost = 30; factoryCost = 220; megaCost = 1200;
+            streak = 0; streakMulti = 1.0;
+            
+            permanentBonus += 30;
+            rebirthLevel = newTier;
+            
+            colaElement.classList.add("rebirth-ascend");
+            setTimeout(() => colaElement.classList.remove("rebirth-ascend"), 700);
+            playUpgradeSound();
+            updateUI();
+            closeAllPanels();
+            floatingText(`🌀 REBIRTH ${newTier}! +30% permanent bonus`, window.innerWidth/2, 150);
+            restartIdleTimer();
+            saveGame();
+        };
+        
+        // ------------------- UI PANELS -------------------
+        window.openPanel = function(id) { closeAllPanels(); document.getElementById(id).style.display = "flex"; };
+        window.closeAllPanels = function() { document.querySelectorAll('.panel').forEach(p => p.style.display = "none"); };
+        window.toggleMusic = function() { musicOn = !musicOn; musicOn ? music.play().catch(e=>{}) : music.pause(); };
+        window.toggleSFX = function() { sfxOn = !sfxOn; };
+        document.getElementById("volSlider").addEventListener("input", (e) => { volume = parseFloat(e.target.value); music.volume = volume; });
+        
+        // AUTO INCOME LOOP
+        setInterval(() => {
+            let inc = getAutoIncome();
+            if(inc > 0 && !locked) {
+                cola += inc;
+                totalAllTime += inc;
+                updateUI();
+            }
+        }, 1000);
+        
+        // EVENT LISTENERS
+        colaElement.addEventListener("click", handleColaClick);
+        
+        // INITIALIZE - load save first
+        const loaded = loadGame();
+        if(!loaded) {
+            // fresh start, set defaults
+            updateUI();
+        }
+        
+        // Leaderboard init
+        let storedBoard = localStorage.getItem("colaLeaderboard");
+        if(storedBoard) leaderboard = JSON.parse(storedBoard);
+        playerName = localStorage.getItem("colaPlayer");
+        if(!playerName && !loaded) { 
+            playerName = prompt("Enter your name:", "ColaMaster") || "Guest"; 
+            playerName = playerName.slice(0,14); 
+            localStorage.setItem("colaPlayer", playerName); 
+        } else if(!playerName) {
+            playerName = "ColaMaster";
+        }
+        renderLeaderboard();
+        restartIdleTimer();
+        updateUI();
+    })();
+</script>
+</body>
+</html>
