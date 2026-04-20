@@ -1,79 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Coke Clicker</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background: #111;
-      color: #fff;
-    }
-    h1 {
-      color: #e61c2d;
-    }
-    button {
-      padding: 15px 25px;
-      font-size: 18px;
-      margin: 10px;
-      cursor: pointer;
-      border: none;
-      border-radius: 8px;
-    }
-    #clickBtn {
-      background: #e61c2d;
-      color: white;
-    }
-    #upgradeBtn {
-      background: #444;
-      color: white;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Coke Clicker Deluxe</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: #111;
+  color: white;
+  display: flex;
+}
+
+#game {
+  flex: 1;
+  text-align: center;
+  padding-top: 50px;
+}
+
+#colaBtn {
+  font-size: 30px;
+  padding: 30px;
+  border-radius: 20px;
+  background: #e61c2d;
+  color: white;
+  cursor: pointer;
+}
+
+.float {
+  position: absolute;
+  color: #0f0;
+  animation: floatUp 1s forwards;
+}
+
+@keyframes floatUp {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-80px); }
+}
+
+#sidebar {
+  width: 300px;
+  background: #222;
+  padding: 10px;
+}
+
+.tab {
+  padding: 10px;
+  background: #333;
+  margin: 5px;
+  cursor: pointer;
+}
+
+.section {
+  display: none;
+}
+
+.active {
+  display: block;
+}
+</style>
 </head>
+
 <body>
 
-  <h1>🥤 Coke Clicker</h1>
-  <h2>Cokes: <span id="score">0</span></h2>
+<div id="game">
+  <h1>🥤 Cola Clicker</h1>
+  <h2 id="cola">0 Cola</h2>
 
-  <button id="clickBtn">Drink Coke (+1)</button>
-  <br>
-  <button id="upgradeBtn">Buy Auto-Drinker (Cost: 10)</button>
+  <button id="colaBtn">DRINK COLA</button>
+</div>
 
-  <script>
-    let score = 0;
-    let autoClickers = 0;
-    let cost = 10;
+<div id="sidebar">
 
-    const scoreDisplay = document.getElementById("score");
-    const clickBtn = document.getElementById("clickBtn");
-    const upgradeBtn = document.getElementById("upgradeBtn");
+  <div class="tab" onclick="show('main')">Main</div>
+  <div class="tab" onclick="show('upgrades')">Upgrades</div>
+  <div class="tab" onclick="show('settings')">Settings</div>
+  <div class="tab" onclick="show('leaderboard')">Leaderboard</div>
 
-    clickBtn.onclick = () => {
-      score++;
-      update();
-    };
+  <div id="main" class="section active">
+    <p>All-time cola: <span id="alltime">0</span></p>
+  </div>
 
-    upgradeBtn.onclick = () => {
-      if (score >= cost) {
-        score -= cost;
-        autoClickers++;
-        cost = Math.floor(cost * 1.5);
-        update();
-      }
-    };
+  <div id="upgrades" class="section">
+    <button onclick="buyClick()">+1 Click (Cost 10)</button>
+    <button onclick="buyAuto()">Auto Cola (Cost 25)</button>
+  </div>
 
-    function update() {
-      scoreDisplay.textContent = score;
-      upgradeBtn.textContent = `Buy Auto-Drinker (Cost: ${cost})`;
-    }
+  <div id="settings" class="section">
+    <p>Music</p>
+    <input type="range">
+    <p>SFX</p>
+    <input type="range">
+  </div>
 
-    // Auto click every second
-    setInterval(() => {
-      score += autoClickers;
-      update();
-    }, 1000);
-  </script>
+  <div id="leaderboard" class="section">
+    <h3>Top Cola Players (Fake Local)</h3>
+    <div id="board"></div>
+  </div>
+
+</div>
+
+<script>
+let cola = 0;
+let allTime = 0;
+let clickPower = 1;
+let auto = 0;
+let prestige = 0;
+
+const colaText = document.getElementById("cola");
+const allText = document.getElementById("alltime");
+const board = document.getElementById("board");
+
+document.getElementById("colaBtn").onclick = (e) => {
+  cola += clickPower;
+  allTime += clickPower;
+  update();
+
+  // floating number
+  let f = document.createElement("div");
+  f.className = "float";
+  f.innerText = "+" + clickPower;
+  f.style.left = e.pageX + "px";
+  f.style.top = e.pageY + "px";
+  document.body.appendChild(f);
+  setTimeout(() => f.remove(), 1000);
+};
+
+function buyClick() {
+  if (cola >= 10) {
+    cola -= 10;
+    clickPower++;
+    update();
+  }
+}
+
+function buyAuto() {
+  if (cola >= 25) {
+    cola -= 25;
+    auto++;
+    update();
+  }
+}
+
+function update() {
+  colaText.innerText = Math.floor(cola) + " Cola";
+  allText.innerText = Math.floor(allTime);
+  updateBoard();
+}
+
+setInterval(() => {
+  cola += auto;
+  allTime += auto;
+  update();
+}, 1000);
+
+// fake leaderboard
+function updateBoard() {
+  let fake = [
+    ["Player1", 9999],
+    ["Player2", 8000],
+    ["You", allTime]
+  ];
+
+  fake.sort((a,b)=>b[1]-a[1]);
+
+  board.innerHTML = "";
+  fake.forEach(p => {
+    board.innerHTML += `<p>${p[0]}: ${p[1]}</p>`;
+  });
+}
+
+// tabs
+function show(id){
+  document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+// prestige (basic version)
+function prestigeReset(){
+  if(allTime >= 1000){
+    prestige++;
+    cola = 0;
+    clickPower = 1 + prestige;
+    auto = 0;
+    allTime = 0;
+    alert("Prestiged! +20% bonus forever (not fully implemented yet)");
+    update();
+  }
+}
+</script>
 
 </body>
 </html>
