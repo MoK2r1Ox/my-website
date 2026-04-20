@@ -30,7 +30,7 @@ button {
   cursor: pointer;
 }
 
-/* CENTER GAME */
+/* CENTER */
 #main {
   height: 100vh;
   display: flex;
@@ -50,18 +50,18 @@ button {
   transform: scale(0.9);
 }
 
-/* FLOATING NUMBERS */
+/* 💥 FLOATING NUMBERS (UPGRADED) */
 .float {
   position: fixed;
-  color: #00ff88;
-  font-size: 20px;
+  font-weight: bold;
   animation: floatUp 1s forwards;
   pointer-events: none;
+  text-shadow: 0 0 10px rgba(0,255,100,0.8);
 }
 
 @keyframes floatUp {
-  from { opacity: 1; transform: translateY(0); }
-  to { opacity: 0; transform: translateY(-100px); }
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-120px) scale(1.3); }
 }
 
 /* PANELS */
@@ -74,6 +74,33 @@ button {
   padding: 10px;
   border-radius: 10px;
   display: none;
+}
+
+/* 🔥 STREAK HUD */
+#streakHUD {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 220px;
+  background: #111;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #333;
+}
+
+#bar {
+  height: 10px;
+  background: #333;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+#fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00ff88, #00aaff);
+  transition: width 0.2s;
 }
 </style>
 </head>
@@ -108,6 +135,12 @@ button {
   <div id="cola">🥤</div>
 </div>
 
+<!-- 🔥 STREAK UI -->
+<div id="streakHUD">
+  <div>Streak Multiplier: <span id="multi">1.0x</span></div>
+  <div id="bar"><div id="fill"></div></div>
+</div>
+
 <script>
 let cola = 0;
 let allTime = 0;
@@ -124,12 +157,9 @@ const colaBtn = document.getElementById("cola");
 colaBtn.onclick = (e) => {
   let now = Date.now();
 
-  // 🔥 NERFED STREAK (max ~1.5x)
-  if (now - lastClick < 700) {
-    streak++;
-  } else {
-    streak = 1;
-  }
+  if (now - lastClick < 700) streak++;
+  else streak = 1;
+
   lastClick = now;
 
   let multiplier = 1 + Math.min(streak * 0.05, 0.5);
@@ -139,16 +169,25 @@ colaBtn.onclick = (e) => {
   cola += gain;
   allTime += gain;
 
-  showFloat(e, "+" + gain.toFixed(1));
+  showFloat(e, gain, multiplier);
+
+  updateStreakUI(multiplier);
 
   update();
 };
 
-/* FLOAT FIX */
-function showFloat(e, text){
+/* 💥 BETTER FLOATING NUMBERS */
+function showFloat(e, gain, mult){
   let f = document.createElement("div");
   f.className = "float";
-  f.innerText = text;
+
+  let color = mult > 1.3 ? "#ffcc00" : "#00ff88";
+  let size = 16 + mult * 10;
+
+  f.style.color = color;
+  f.style.fontSize = size + "px";
+
+  f.innerText = "+" + gain.toFixed(1);
 
   let x = e.clientX + (Math.random() * 20 - 10);
   let y = e.clientY + (Math.random() * 20 - 10);
@@ -158,6 +197,14 @@ function showFloat(e, text){
 
   document.body.appendChild(f);
   setTimeout(()=>f.remove(),1000);
+}
+
+/* 🔥 STREAK UI */
+function updateStreakUI(mult){
+  document.getElementById("multi").innerText = mult.toFixed(2) + "x";
+
+  let percent = Math.min((streak / 20) * 100, 100);
+  document.getElementById("fill").style.width = percent + "%";
 }
 
 /* UPGRADES */
@@ -192,7 +239,7 @@ function openTab(id){
   document.getElementById(id).style.display = "block";
 }
 
-/* LEADERBOARD (LOCAL FAKE) */
+/* LEADERBOARD */
 function updateBoard(){
   let fake = [
     ["You", allTime],
@@ -203,7 +250,7 @@ function updateBoard(){
   fake.sort((a,b)=>b[1]-a[1]);
 
   document.getElementById("board").innerHTML =
-    fake.map(p=>`<p>${p[0]} - ${p[1]}</p>`).join("");
+    fake.map(p=>`<p>${p[0]} - ${p[1].toFixed(0)}</p>`).join("");
 }
 
 /* PRESTIGE */
@@ -215,7 +262,7 @@ function prestige(){
     auto = 0;
     allTime = 0;
     streak = 0;
-    alert("Prestiged! Cola upgraded ⭐");
+    alert("Prestiged! ⭐");
     update();
   }
 }
