@@ -13,26 +13,33 @@ body {
   overflow: hidden;
 }
 
-/* HUD */
+/* BIG COLA DISPLAY */
 #hud {
   position: absolute;
   top: 10px;
   left: 10px;
 }
 
+#bigCola {
+  font-size: 60px;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 20px;
+}
+
 /* TOP MENU */
 #top {
   position: absolute;
-  top: 40px;
+  top: 70px;
   left: 10px;
 }
 
 button {
   margin: 5px;
   padding: 8px;
-  background: #333;
   border: none;
   border-radius: 6px;
+  background: #333;
   color: white;
   cursor: pointer;
 }
@@ -46,7 +53,7 @@ button {
 }
 
 #cola {
-  font-size: 150px;
+  font-size: 170px;
   cursor: pointer;
   user-select: none;
   transition: transform 0.1s;
@@ -60,7 +67,7 @@ button {
 .float {
   position: fixed;
   color: #00ff88;
-  font-size: 20px;
+  font-size: 22px;
   font-weight: bold;
   animation: floatUp 1s forwards;
 }
@@ -73,70 +80,75 @@ button {
 /* PANELS */
 .panel {
   position: absolute;
-  top: 90px;
+  top: 120px;
   left: 10px;
-  width: 260px;
+  width: 280px;
   background: #222;
   padding: 10px;
   border-radius: 10px;
   display: none;
 }
 
-/* PRESTIGE POPUP */
-#prestigeModal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.8);
-  display: none;
-  justify-content: center;
-  align-items: center;
-}
-
-#prestigeBox {
+/* STREAK HUD (BACK + CLEAR) */
+#streakHUD {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  width: 260px;
   background: #111;
-  padding: 20px;
+  padding: 10px;
   border-radius: 10px;
-  width: 320px;
-  text-align: center;
 }
 
-.green { color: #00ff88; }
-.red { color: #ff4444; }
+#bar {
+  height: 10px;
+  background: #333;
+  border-radius: 5px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+#fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #00ff88, #00aaff);
+  transition: width 0.1s;
+}
 </style>
 </head>
 
 <body>
 
 <div id="hud">
-🥤 Cola: <span id="colaCount">0</span>
+  🥤 Cola: <span id="colaCount">0</span>
+</div>
+
+<div id="bigCola">
+  TOTAL: <span id="allTime">0</span>
 </div>
 
 <div id="top">
   <button onclick="openTab('shop')">Upgrades</button>
   <button onclick="openTab('settings')">Settings</button>
   <button onclick="openTab('leader')">Leaderboard</button>
-  <button onclick="openPrestige()">Prestige ⭐</button>
 </div>
 
 <div id="shop" class="panel">
   <h3>Upgrades</h3>
+
+  <p>⚡ CLICK UPGRADES</p>
   <button onclick="buyClick()">+1 Click (10)</button>
-  <button onclick="buyAuto()">Auto Cola (25)</button>
+  <button onclick="buyGalaxy()">Galaxy Cola +100 Click (500)</button>
 
   <hr>
 
-  <button onclick="buyFactory()">Coke Factory (200)</button>
-  <button onclick="buyGalaxy()">Galaxy Cola (500)</button>
-
-  <!-- POST PRESTIGE -->
-  <button onclick="buyQuantum()">Quantum Factory (2000)</button>
-  <button onclick="buyReactor()">Cola Reactor (3000)</button>
-  <button onclick="buyHyper()">Hyper Click Engine (5000)</button>
+  <p>🤖 AUTO UPGRADES</p>
+  <button onclick="buyAuto()">Auto Cola (25)</button>
+  <button onclick="buyFactory()">Coke Factory +30/s (200)</button>
 </div>
 
 <div id="settings" class="panel">
   <h3>Settings</h3>
-  <p>All-time cola: <span id="allTime">0</span></p>
   <p>Prestige: <span id="prestige">0</span></p>
 </div>
 
@@ -149,20 +161,10 @@ button {
   <div id="cola">🥤</div>
 </div>
 
-<!-- PRESTIGE -->
-<div id="prestigeModal">
-  <div id="prestigeBox">
-    <h2>Prestige?</h2>
-
-    <p>Requirement: <b>35,000 cola</b></p>
-
-    <p class="green">✔ +30% permanent boost</p>
-    <p class="green">✔ Unlock 3 new upgrades</p>
-    <p class="red">❌ Reset all upgrades</p>
-
-    <button onclick="doPrestige()">YES</button>
-    <button onclick="closePrestige()">NO</button>
-  </div>
+<!-- STREAK -->
+<div id="streakHUD">
+  <div>STREAK: <span id="multi">1.00x</span> (100 clicks max)</div>
+  <div id="bar"><div id="fill"></div></div>
 </div>
 
 <script>
@@ -173,22 +175,21 @@ let auto = 0;
 let prestige = 0;
 let boost = 1;
 
+/* STREAK SYSTEM */
+let streak = 0;
+let lastClick = 0;
+
 /* CLICK */
 document.getElementById("cola").onclick = (e) => {
-
-  // 🔥 STRONGER STREAK FARMING
-  if(!window.streak) window.streak = 0;
-  if(!window.last) window.last = 0;
-
   let now = Date.now();
 
-  if(now - window.last < 650) window.streak++;
-  else window.streak = 1;
+  if(now - lastClick < 600) streak++;
+  else streak = 1;
 
-  window.last = now;
+  lastClick = now;
 
-  // 🔥 HARDER SCALING (more reward)
-  let mult = 1 + Math.min(window.streak * 0.08, 0.8);
+  // 🔥 100 CLICK GRIND SYSTEM → MAX x2.0
+  let mult = 1 + Math.min(streak / 100, 1);
 
   let gain = clickPower * mult * boost;
 
@@ -197,6 +198,7 @@ document.getElementById("cola").onclick = (e) => {
 
   float(e, gain);
 
+  updateStreak(mult);
   update();
 };
 
@@ -213,17 +215,20 @@ function float(e,val){
   setTimeout(()=>f.remove(),1000);
 }
 
+/* STREAK UI */
+function updateStreak(mult){
+  document.getElementById("multi").innerText = mult.toFixed(2) + "x";
+
+  let percent = Math.min((streak / 100) * 100, 100);
+  document.getElementById("fill").style.width = percent + "%";
+}
+
 /* UPGRADES */
 function buyClick(){ if(cola>=10){ cola-=10; clickPower++; update(); } }
-function buyAuto(){ if(cola>=25){ cola-=25; auto++; update(); } }
-
-function buyFactory(){ if(cola>=200){ cola-=200; auto+=30; update(); } }
 function buyGalaxy(){ if(cola>=500){ cola-=500; clickPower+=100; update(); } }
 
-/* POST PRESTIGE */
-function buyQuantum(){ if(cola>=2000){ cola-=2000; auto+=200; update(); } }
-function buyReactor(){ if(cola>=3000){ cola-=3000; boost+=0.05; update(); } }
-function buyHyper(){ if(cola>=5000){ cola-=5000; clickPower+=500; update(); } }
+function buyAuto(){ if(cola>=25){ cola-=25; auto++; update(); } }
+function buyFactory(){ if(cola>=200){ cola-=200; auto+=30; update(); } }
 
 /* AUTO */
 setInterval(()=>{
@@ -232,40 +237,12 @@ setInterval(()=>{
   update();
 },1000);
 
-/* TABS */
+/* PANELS */
 function openTab(id){
   ["shop","settings","leader"].forEach(p=>{
     document.getElementById(p).style.display="none";
   });
   document.getElementById(id).style.display="block";
-}
-
-/* PRESTIGE */
-function openPrestige(){
-  document.getElementById("prestigeModal").style.display="flex";
-}
-
-function closePrestige(){
-  document.getElementById("prestigeModal").style.display="none";
-}
-
-function doPrestige(){
-  if(allTime < 35000){
-    alert("Need 35,000 cola!");
-    return;
-  }
-
-  prestige++;
-  boost *= 1.3;
-
-  cola = 0;
-  clickPower = 1;
-  auto = 0;
-
-  window.streak = 0;
-
-  closePrestige();
-  update();
 }
 
 /* LEADERBOARD */
