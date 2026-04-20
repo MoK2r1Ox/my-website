@@ -13,12 +13,11 @@ body {
   overflow: hidden;
 }
 
-/* TOP HUD */
+/* HUD */
 #hud {
   position: absolute;
   top: 10px;
   left: 10px;
-  font-size: 18px;
 }
 
 /* TOP MENU */
@@ -31,9 +30,9 @@ body {
 button {
   margin: 5px;
   padding: 8px;
+  background: #333;
   border: none;
   border-radius: 6px;
-  background: #333;
   color: white;
   cursor: pointer;
 }
@@ -57,18 +56,18 @@ button {
   transform: scale(0.9);
 }
 
-/* 💥 FLOATING NUMBERS (better) */
+/* FLOAT */
 .float {
   position: fixed;
+  color: #00ff88;
+  font-size: 20px;
   font-weight: bold;
   animation: floatUp 1s forwards;
-  pointer-events: none;
-  text-shadow: 0 0 10px rgba(0,255,100,0.8);
 }
 
 @keyframes floatUp {
-  0% { opacity: 1; transform: translateY(0) scale(1); }
-  100% { opacity: 0; transform: translateY(-120px) scale(1.4); }
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-120px); }
 }
 
 /* PANELS */
@@ -83,40 +82,33 @@ button {
   display: none;
 }
 
-/* 🔥 STREAK HUD */
-#streakHUD {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  width: 240px;
+/* PRESTIGE POPUP */
+#prestigeModal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  justify-content: center;
+  align-items: center;
+}
+
+#prestigeBox {
   background: #111;
-  padding: 10px;
+  padding: 20px;
   border-radius: 10px;
-  border: 1px solid #333;
+  width: 320px;
+  text-align: center;
 }
 
-#bar {
-  height: 10px;
-  background: #333;
-  border-radius: 5px;
-  overflow: hidden;
-  margin-top: 5px;
-}
-
-#fill {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, #00ff88, #00aaff);
-  transition: width 0.15s;
-}
+.green { color: #00ff88; }
+.red { color: #ff4444; }
 </style>
 </head>
 
 <body>
 
-<!-- 🥤 TOP HUD -->
 <div id="hud">
-  🥤 Cola: <span id="colaCount">0</span>
+🥤 Cola: <span id="colaCount">0</span>
 </div>
 
 <div id="top">
@@ -130,8 +122,16 @@ button {
   <h3>Upgrades</h3>
   <button onclick="buyClick()">+1 Click (10)</button>
   <button onclick="buyAuto()">Auto Cola (25)</button>
+
+  <hr>
+
   <button onclick="buyFactory()">Coke Factory (200)</button>
   <button onclick="buyGalaxy()">Galaxy Cola (500)</button>
+
+  <!-- POST PRESTIGE -->
+  <button onclick="buyQuantum()">Quantum Factory (2000)</button>
+  <button onclick="buyReactor()">Cola Reactor (3000)</button>
+  <button onclick="buyHyper()">Hyper Click Engine (5000)</button>
 </div>
 
 <div id="settings" class="panel">
@@ -149,10 +149,20 @@ button {
   <div id="cola">🥤</div>
 </div>
 
-<!-- 🔥 STREAK HUD (RESTORED) -->
-<div id="streakHUD">
-  <div>Streak: <span id="multi">1.00x</span></div>
-  <div id="bar"><div id="fill"></div></div>
+<!-- PRESTIGE -->
+<div id="prestigeModal">
+  <div id="prestigeBox">
+    <h2>Prestige?</h2>
+
+    <p>Requirement: <b>35,000 cola</b></p>
+
+    <p class="green">✔ +30% permanent boost</p>
+    <p class="green">✔ Unlock 3 new upgrades</p>
+    <p class="red">❌ Reset all upgrades</p>
+
+    <button onclick="doPrestige()">YES</button>
+    <button onclick="closePrestige()">NO</button>
+  </div>
 </div>
 
 <script>
@@ -160,93 +170,60 @@ let cola = 0;
 let allTime = 0;
 let clickPower = 1;
 let auto = 0;
-let prestigeLevel = 0;
+let prestige = 0;
 let boost = 1;
 
-let streak = 0;
-let lastClick = 0;
-
-const colaBtn = document.getElementById("cola");
-
 /* CLICK */
-colaBtn.onclick = (e) => {
+document.getElementById("cola").onclick = (e) => {
+
+  // 🔥 STRONGER STREAK FARMING
+  if(!window.streak) window.streak = 0;
+  if(!window.last) window.last = 0;
+
   let now = Date.now();
 
-  // 🔥 FAST STREAK BUILD (7 clicks max feel)
-  if (now - lastClick < 650) streak++;
-  else streak = 1;
+  if(now - window.last < 650) window.streak++;
+  else window.streak = 1;
 
-  lastClick = now;
+  window.last = now;
 
-  let multiplier = 1 + Math.min(streak * 0.07, 0.5); // max ~1.5x
+  // 🔥 HARDER SCALING (more reward)
+  let mult = 1 + Math.min(window.streak * 0.08, 0.8);
 
-  let gain = clickPower * multiplier * boost;
+  let gain = clickPower * mult * boost;
 
   cola += gain;
   allTime += gain;
 
-  showFloat(e, gain);
+  float(e, gain);
 
-  updateStreak(multiplier);
   update();
 };
 
-/* 💥 CLICK FX */
-function showFloat(e, text){
+/* FLOAT */
+function float(e,val){
   let f = document.createElement("div");
   f.className = "float";
-  f.innerText = "+" + text.toFixed(1);
+  f.innerText = "+" + val.toFixed(1);
 
-  let x = e.clientX + (Math.random() * 20 - 10);
-  let y = e.clientY + (Math.random() * 20 - 10);
-
-  f.style.left = x + "px";
-  f.style.top = y + "px";
+  f.style.left = e.clientX + "px";
+  f.style.top = e.clientY + "px";
 
   document.body.appendChild(f);
   setTimeout(()=>f.remove(),1000);
 }
 
-/* 🔥 STREAK UI */
-function updateStreak(mult){
-  document.getElementById("multi").innerText = mult.toFixed(2) + "x";
-
-  let percent = Math.min((streak / 7) * 100, 100);
-  document.getElementById("fill").style.width = percent + "%";
-}
-
 /* UPGRADES */
-function buyClick(){
-  if(cola >= 10){
-    cola -= 10;
-    clickPower++;
-    update();
-  }
-}
+function buyClick(){ if(cola>=10){ cola-=10; clickPower++; update(); } }
+function buyAuto(){ if(cola>=25){ cola-=25; auto++; update(); } }
 
-function buyAuto(){
-  if(cola >= 25){
-    cola -= 25;
-    auto++;
-    update();
-  }
-}
+function buyFactory(){ if(cola>=200){ cola-=200; auto+=30; update(); } }
+function buyGalaxy(){ if(cola>=500){ cola-=500; clickPower+=100; update(); } }
 
-function buyFactory(){
-  if(cola >= 200){
-    cola -= 200;
-    auto += 30;
-    update();
-  }
-}
-
-function buyGalaxy(){
-  if(cola >= 500){
-    cola -= 500;
-    clickPower += 100;
-    update();
-  }
-}
+/* POST PRESTIGE */
+function buyQuantum(){ if(cola>=2000){ cola-=2000; auto+=200; update(); } }
+function buyReactor(){ if(cola>=3000){ cola-=3000; boost+=0.05; update(); } }
+function buyHyper(){ if(cola>=5000){ cola-=5000; clickPower+=500; update(); } }
 
 /* AUTO */
 setInterval(()=>{
@@ -255,12 +232,40 @@ setInterval(()=>{
   update();
 },1000);
 
-/* PANELS */
+/* TABS */
 function openTab(id){
   ["shop","settings","leader"].forEach(p=>{
-    document.getElementById(p).style.display = "none";
+    document.getElementById(p).style.display="none";
   });
-  document.getElementById(id).style.display = "block";
+  document.getElementById(id).style.display="block";
+}
+
+/* PRESTIGE */
+function openPrestige(){
+  document.getElementById("prestigeModal").style.display="flex";
+}
+
+function closePrestige(){
+  document.getElementById("prestigeModal").style.display="none";
+}
+
+function doPrestige(){
+  if(allTime < 35000){
+    alert("Need 35,000 cola!");
+    return;
+  }
+
+  prestige++;
+  boost *= 1.3;
+
+  cola = 0;
+  clickPower = 1;
+  auto = 0;
+
+  window.streak = 0;
+
+  closePrestige();
+  update();
 }
 
 /* LEADERBOARD */
@@ -277,29 +282,11 @@ function updateBoard(){
     fake.map(p=>`<p>${p[0]} - ${p[1].toFixed(0)}</p>`).join("");
 }
 
-/* PRESTIGE */
-function openPrestige(){
-  if(allTime < 1000){
-    alert("Need 1000 cola!");
-    return;
-  }
-
-  prestigeLevel++;
-  boost *= 1.3;
-
-  cola = 0;
-  clickPower = 1;
-  auto = 0;
-  streak = 0;
-
-  update();
-}
-
 /* UPDATE */
 function update(){
   document.getElementById("colaCount").innerText = Math.floor(cola);
   document.getElementById("allTime").innerText = Math.floor(allTime);
-  document.getElementById("prestige").innerText = prestigeLevel;
+  document.getElementById("prestige").innerText = prestige;
   updateBoard();
 }
 </script>
