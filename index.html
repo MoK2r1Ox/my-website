@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥤 COLA ODYSSEY | 5 Prestige Tiers - Endless Challenge</title>
+    <title>🥤 COLA ODYSSEY | 5 Prestige Tiers | Hardcore Idle Clicker</title>
     <style>
         * {
             user-select: none;
@@ -18,10 +18,9 @@
             font-family: 'Segoe UI', 'Poppins', 'Inter', system-ui, sans-serif;
             color: #f0ede8;
             overflow-x: hidden;
-            transition: background 0.5s ease;
+            transition: background 0.4s ease;
         }
 
-        /* Prestige-specific backgrounds */
         body[data-rebirth="0"] { background: radial-gradient(circle at 30% 20%, #0a0a12, #020208); }
         body[data-rebirth="1"] { background: radial-gradient(circle at 70% 30%, #1a0a2e, #050210); }
         body[data-rebirth="2"] { background: radial-gradient(circle at 20% 70%, #0a1a2e, #020a15); }
@@ -29,7 +28,6 @@
         body[data-rebirth="4"] { background: radial-gradient(circle at 50% 50%, #1a0f2a, #060210); }
         body[data-rebirth="5"] { background: radial-gradient(circle at 30% 60%, #2a0f1a, #100208); }
 
-        /* Glass HUD */
         .hud {
             position: fixed;
             top: 18px;
@@ -108,6 +106,7 @@
             font-size: 0.85rem;
             color: #ffefcf;
             cursor: pointer;
+            transition: 0.1s;
         }
         .menu-btn:active { transform: scale(0.95); }
 
@@ -131,17 +130,17 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 380px;
-            max-width: 88vw;
+            width: 400px;
+            max-width: 90vw;
             background: #0a0a18f2;
             backdrop-filter: blur(28px);
             border-radius: 44px;
-            padding: 22px 20px;
+            padding: 20px;
             border: 1px solid #ff8c4280;
             z-index: 300;
             display: none;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             max-height: 85vh;
             overflow-y: auto;
         }
@@ -154,22 +153,24 @@
             font-weight: bold;
             color: white;
             cursor: pointer;
+            transition: 0.05s;
         }
         .panel button:active { transform: scale(0.97); background: #4a3a5f; }
+        .panel button:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
         .close-panel { background: #7a3a28 !important; margin-top: 8px; }
         hr { border-color: #ff8c4260; margin: 8px 0; }
         .info-card {
             background: #1a1a2ecc;
             border-radius: 28px;
-            padding: 14px;
+            padding: 12px;
             font-family: monospace;
             font-size: 0.85rem;
         }
         .info-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #ff8c4233; }
-        .prestige-card { background: #1e293bcc; border-left: 5px solid #ffb347; padding: 14px; border-radius: 28px; margin: 8px 0; }
+        .prestige-card { background: #1e293bcc; border-left: 5px solid #ffb347; padding: 12px; border-radius: 28px; margin: 6px 0; }
         .leaderboard-entry {
             background: #00000066;
-            margin: 6px 0;
+            margin: 5px 0;
             padding: 8px 12px;
             border-radius: 60px;
             display: flex;
@@ -209,7 +210,7 @@
             50% { filter: drop-shadow(0 0 70px #ffcc55) scale(1.18);}
             100% { filter: drop-shadow(0 0 20px #ff8844) scale(1);}
         }
-        .warning-toast {
+        .toast-message {
             position: fixed;
             bottom: 40px;
             left: 50%;
@@ -221,7 +222,9 @@
             font-weight: bold;
             z-index: 400;
             animation: fadeOutUp 2s forwards;
+            pointer-events: none;
         }
+        .toast-success { background: #2ecc71ee; }
         @keyframes fadeOutUp {
             0% { opacity: 1; bottom: 40px; }
             100% { opacity: 0; bottom: 100px; visibility: hidden; }
@@ -237,7 +240,7 @@
             text-align: center;
         }
         .cooldown-text { font-size: 0.7rem; color: #ffaa66; text-align: center; margin-top: 5px; }
-        .upgrade-locked { opacity: 0.5; filter: grayscale(0.3); }
+        .upgrade-group { margin-top: 8px; }
     </style>
 </head>
 <body data-rebirth="0">
@@ -264,7 +267,7 @@
 
 <!-- UPGRADES PANEL -->
 <div id="shopPanel" class="panel">
-    <h3>✨ CLICKER UPGRADES</h3>
+    <h3>✨ CORE UPGRADES</h3>
     <button onclick="buyClickUpgrade()">🔨 +1 Base Click (Cost: <span id="clickCost">10</span>)</button>
     <button onclick="buyQuantum()">⚡ Quantum Core +50 (Cost: <span id="quantumCost">450</span>)</button>
     <hr>
@@ -273,39 +276,26 @@
     <button onclick="buyFactory()">🏭 Bottling +8/s (Cost: <span id="factoryCost">220</span>)</button>
     <button onclick="buyMega()">🌀 Mega Tank +50/s (Cost: <span id="megaCost">1200</span>)</button>
     
-    <!-- PRESTIGE EXCLUSIVE UPGRADES - Unlock with each rebirth -->
-    <hr id="prestigeDiv1" style="display: none;">
-    <div id="prestigeUpgrades1" style="display: none;">
-        <h3>🌟 TIER 1 - GALAXY UPGRADES</h3>
-        <button id="galaxyUpgrade" onclick="buyGalaxyUpgrade()">🌌 Galaxy Surge (2x Click Power) - Cost: <span id="galaxyCost">5000</span></button>
-    </div>
-    <hr id="prestigeDiv2" style="display: none;">
-    <div id="prestigeUpgrades2" style="display: none;">
-        <h3>💫 TIER 2 - NEBULA UPGRADES</h3>
-        <button id="nebulaUpgrade" onclick="buyNebulaUpgrade()">💫 Nebula Echo (Auto x3) - Cost: <span id="nebulaCost">25000</span></button>
-    </div>
-    <hr id="prestigeDiv3" style="display: none;">
-    <div id="prestigeUpgrades3" style="display: none;">
-        <h3>✨ TIER 3 - STELLAR UPGRADES</h3>
-        <button id="stellarUpgrade" onclick="buyStellarUpgrade()">✨ Stellar Blessing (+100% Global) - Cost: <span id="stellarCost">100000</span></button>
-    </div>
-    <hr id="prestigeDiv4" style="display: none;">
-    <div id="prestigeUpgrades4" style="display: none;">
-        <h3>👑 TIER 4 - COSMIC UPGRADES</h3>
-        <button id="cosmicUpgrade" onclick="buyCosmicUpgrade()">👑 Cosmic Overlord (Streak x2) - Cost: <span id="cosmicCost">500000</span></button>
-    </div>
-    <hr id="prestigeDiv5" style="display: none;">
-    <div id="prestigeUpgrades5" style="display: none;">
-        <h3>🏆 TIER 5 - OMEGA UPGRADES</h3>
-        <button id="omegaUpgrade" onclick="buyOmegaUpgrade()">🏆 Omega Finale (All Bonuses Doubled) - Cost: <span id="omegaCost">2000000</span></button>
+    <!-- Prestige Exclusive Upgrades -->
+    <div id="prestigeUpgradesContainer">
+        <hr id="prestigeDiv1" style="display: none;">
+        <div id="upgrade1" style="display: none;" class="upgrade-group"><h3>🌌 TIER 1 - GALAXY</h3><button onclick="buyGalaxyUpgrade()">🌌 Galaxy Surge (2x Click Power) - Cost: <span id="galaxyCost">5000</span></button></div>
+        <hr id="prestigeDiv2" style="display: none;">
+        <div id="upgrade2" style="display: none;" class="upgrade-group"><h3>💫 TIER 2 - NEBULA</h3><button onclick="buyNebulaUpgrade()">💫 Nebula Echo (Auto x3) - Cost: <span id="nebulaCost">25000</span></button></div>
+        <hr id="prestigeDiv3" style="display: none;">
+        <div id="upgrade3" style="display: none;" class="upgrade-group"><h3>✨ TIER 3 - STELLAR</h3><button onclick="buyStellarUpgrade()">✨ Stellar Blessing (+100% Global) - Cost: <span id="stellarCost">100000</span></button></div>
+        <hr id="prestigeDiv4" style="display: none;">
+        <div id="upgrade4" style="display: none;" class="upgrade-group"><h3>👑 TIER 4 - COSMIC</h3><button onclick="buyCosmicUpgrade()">👑 Cosmic Overlord (Streak x1.5) - Cost: <span id="cosmicCost">500000</span></button></div>
+        <hr id="prestigeDiv5" style="display: none;">
+        <div id="upgrade5" style="display: none;" class="upgrade-group"><h3>🏆 TIER 5 - OMEGA</h3><button onclick="buyOmegaUpgrade()">🏆 Omega Finale (All Bonuses Doubled) - Cost: <span id="omegaCost">2000000</span></button></div>
     </div>
     <button class="close-panel" onclick="closeAllPanels()">✖ CLOSE</button>
 </div>
 
-<!-- REBIRTH PANEL - 5 TIERS -->
+<!-- REBIRTH PANEL -->
 <div id="rebirthPanel" class="panel">
     <h3>🌀 ASCEND TO NEW REALMS</h3>
-    <div class="prestige-card" id="rebirthDescCard">
+    <div class="prestige-card">
         <div id="rebirthDesc"></div>
         <button id="rebirthBtn" onclick="performRebirth()" style="margin-top:12px;">✨ ASCEND NOW</button>
         <div id="rebirthReq" style="margin-top:8px; font-size:0.8rem;"></div>
@@ -327,12 +317,12 @@
     <div class="info-card">
         <div class="info-row"><span>👤 NICKNAME:</span><span id="displayName">---</span></div>
         <input type="text" id="nicknameInput" class="nickname-edit" placeholder="New nickname (max 14)" maxlength="14">
-        <button id="changeNicknameBtn" onclick="attemptNicknameChange()" style="margin-top:6px;">✏️ CHANGE NAME</button>
+        <button onclick="attemptNicknameChange()" style="margin-top:6px;">✏️ CHANGE NAME</button>
         <div id="cooldownDisplay" class="cooldown-text"></div>
     </div>
     <div class="info-card">
         <div class="info-row"><span>🥤 TOTAL COLA:</span><span id="statTotal">0</span></div>
-        <div class="info-row"><span>🌀 REBIRTH TIER:</span><span id="statRebirth">0</span></div>
+        <div class="info-row"><span>🌀 REBIRTH TIER:</span><span id="statRebirth">0/5</span></div>
         <div class="info-row"><span>💪 BONUS:</span><span id="statBonus">+0%</span></div>
         <div class="info-row"><span>🔥 MAX STREAK:</span><span id="statMaxStreak">0</span></div>
         <div class="info-row"><span>⏱️ PLAY TIME:</span><span id="statPlaytime">0s</span></div>
@@ -354,56 +344,38 @@
 
 <script>
     (function(){
-        // DOM elements
+        // DOM Elements
         const colaElement = document.getElementById('colaMain');
         
-        // ========== GAME STATE ==========
-        let cola = 0;
-        let totalAllTime = 0;
-        let clickPower = 1;
-        let quantumOwned = false;
-        let autoSiphon = 0, factory = 0, megaTank = 0;
-        let rebirthLevel = 0;  // 0-5
-        let permanentBonus = 0;
+        // ========== GAME STATE (ALL PERSISTENT) ==========
+        let state = {
+            cola: 0, totalAllTime: 0,
+            clickPower: 1, quantumOwned: false,
+            autoSiphon: 0, factory: 0, megaTank: 0,
+            rebirthLevel: 0, permanentBonus: 0,
+            galaxyUpgrade: false, nebulaUpgrade: false, stellarUpgrade: false, cosmicUpgrade: false, omegaUpgrade: false,
+            clickUpgradeLvl: 0, clickCost: 10, quantumCost: 450,
+            autoCost: 30, factoryCost: 220, megaCost: 1200,
+            galaxyCost: 5000, nebulaCost: 25000, stellarCost: 100000, cosmicCost: 500000, omegaCost: 2000000,
+            streak: 0, streakMulti: 1.0, maxStreak: 0,
+            playTimeSeconds: 0, nicknameCooldownUntil: 0, playerName: ""
+        };
         
-        // Prestige exclusive upgrades (each rebirth unlocks one)
-        let galaxyUpgrade = false;   // Tier 1: 2x click power
-        let nebulaUpgrade = false;   // Tier 2: auto x3
-        let stellarUpgrade = false;  // Tier 3: +100% global
-        let cosmicUpgrade = false;   // Tier 4: streak x2
-        let omegaUpgrade = false;    // Tier 5: all bonuses doubled
-        
-        let galaxyCost = 5000, nebulaCost = 25000, stellarCost = 100000, cosmicCost = 500000, omegaCost = 2000000;
-        
-        let clickUpgradeLvl = 0, clickCost = 10;
-        let quantumCost = 450;
-        let autoCost = 30, factoryCost = 220, megaCost = 1200;
-        let streak = 0, streakMulti = 1.0, maxStreak = 0;
-        
-        // Play time
-        let playTimeSeconds = 0;
-        let playTimeInterval = null;
-        
-        // Nickname cooldown (3 days)
-        let nicknameCooldownUntil = 0;
-        let playerName = "";
-        let leaderboard = [];
-        
-        // Audio
+        // Audio & Anti-cheat
         let musicOn = true, sfxOn = true, volume = 0.3;
         let music = new Audio("https://cdn.pixabay.com/audio/2022/10/16/audio_12b5f1b8a1.mp3");
         music.loop = true; music.volume = volume;
-        
-        // Anti auto-clicker
         let clickLog = [], locked = false, lockTimer = null;
         const MAX_CPS = 10;
         let idleTimer = null;
+        let playTimeInterval = null;
+        let leaderboard = [];
         
-        // ========== HELPER FUNCTIONS ==========
+        // Helper functions
         function showToast(msg, isError = true) {
             let div = document.createElement("div");
-            div.className = "warning-toast";
-            div.style.background = isError ? "#ff4444ee" : "#2ecc71ee";
+            div.className = "toast-message";
+            if(!isError) div.classList.add("toast-success");
             div.innerText = msg;
             document.body.appendChild(div);
             setTimeout(() => div.remove(), 2000);
@@ -425,49 +397,50 @@
         function playUpgradeSound() { if(sfxOn) { let s = new Audio("https://cdn.pixabay.com/audio/2022/05/16/audio_8b6a7c8f2c.mp3"); s.volume = volume; s.play().catch(e=>{}); } }
         music.play().catch(()=>{});
         
-        // ========== MULTIPLIER CALCULATIONS (MADE HARDER) ==========
+        // Multipliers
         function totalGlobalMult() {
-            let bonus = permanentBonus;
-            if(stellarUpgrade) bonus += 100;
-            if(omegaUpgrade) bonus = bonus * 2;
-            return 1 + (bonus / 100);
+            let bonus = state.permanentBonus;
+            if(state.stellarUpgrade) bonus += 100;
+            let mult = 1 + (bonus / 100);
+            if(state.omegaUpgrade) mult *= 2;
+            return mult;
         }
         
         function getClickGain() {
-            let base = clickPower + (quantumOwned ? 50 : 0);
-            if(galaxyUpgrade) base *= 2;
-            let streakBonus = streakMulti;
-            if(cosmicUpgrade) streakBonus = Math.min(streakBonus * 1.5, 3.0);
+            let base = state.clickPower + (state.quantumOwned ? 50 : 0);
+            if(state.galaxyUpgrade) base *= 2;
+            let streakBonus = state.streakMulti;
+            if(state.cosmicUpgrade) streakBonus = Math.min(streakBonus * 1.5, 3.0);
             let gain = Math.floor(base * streakBonus * totalGlobalMult());
-            if(omegaUpgrade) gain = Math.floor(gain * 1.5);
+            if(state.omegaUpgrade) gain = Math.floor(gain * 1.5);
             return gain < 1 ? 1 : gain;
         }
         
         function getAutoIncome() {
-            let auto = autoSiphon + (factory * 8) + (megaTank * 50);
-            if(nebulaUpgrade) auto = auto * 3;
+            let auto = state.autoSiphon + (state.factory * 8) + (state.megaTank * 50);
+            if(state.nebulaUpgrade) auto *= 3;
             auto = Math.floor(auto * totalGlobalMult());
-            if(omegaUpgrade) auto = Math.floor(auto * 1.5);
+            if(state.omegaUpgrade) auto = Math.floor(auto * 1.5);
             return auto;
         }
         
         function getColaIcon() {
             const icons = ["🥤", "🍷", "🍾", "🏆", "🌟", "💎"];
-            return icons[Math.min(rebirthLevel, 5)];
+            return icons[Math.min(state.rebirthLevel, 5)];
         }
         
         // Streak
         function updateStreak() {
-            if(streak < 100) streak++;
-            streakMulti = 1 + (streak / 100);
-            if(streakMulti > 2.0) streakMulti = 2.0;
-            if(streak > maxStreak) maxStreak = streak;
+            if(state.streak < 100) state.streak++;
+            state.streakMulti = 1 + (state.streak / 100);
+            if(state.streakMulti > 2.0) state.streakMulti = 2.0;
+            if(state.streak > state.maxStreak) state.maxStreak = state.streak;
             document.querySelector(".streak-container").classList.add("streak-pulse");
             setTimeout(() => document.querySelector(".streak-container").classList.remove("streak-pulse"), 200);
         }
         
         function resetStreakIdle() {
-            if(streak > 0) { streak = 0; streakMulti = 1.0; showFloatingText("💔 Streak broken!", window.innerWidth/2, 100); updateUI(); }
+            if(state.streak > 0) { state.streak = 0; state.streakMulti = 1.0; showFloatingText("💔 Streak broken!", window.innerWidth/2, 100); updateUI(); }
         }
         function restartIdleTimer() { if(idleTimer) clearTimeout(idleTimer); idleTimer = setTimeout(() => resetStreakIdle(), 5000); }
         
@@ -485,40 +458,29 @@
             return !locked;
         }
         
-        // ========== SAVE/LOAD ==========
+        // Save/Load (FULL STATE)
         function saveGame(silent = true) {
-            const saveData = { cola, totalAllTime, clickPower, quantumOwned, autoSiphon, factory, megaTank,
-                rebirthLevel, permanentBonus, galaxyUpgrade, nebulaUpgrade, stellarUpgrade, cosmicUpgrade, omegaUpgrade,
-                clickUpgradeLvl, clickCost, quantumCost, autoCost, factoryCost, megaCost,
-                galaxyCost, nebulaCost, stellarCost, cosmicCost, omegaCost,
-                streak, streakMulti, maxStreak, playTimeSeconds, nicknameCooldownUntil, playerName, version: 5 };
-            localStorage.setItem("colaOdysseySave", JSON.stringify(saveData));
-            if(!silent) showToast("💾 Game Saved!", false);
+            try {
+                localStorage.setItem("colaOdysseyClean", JSON.stringify(state));
+                if(!silent) showToast("💾 Game Saved!", false);
+            } catch(e) { console.warn("save failed"); }
         }
         
         function loadGame() {
-            const raw = localStorage.getItem("colaOdysseySave");
+            const raw = localStorage.getItem("colaOdysseyClean");
             if(!raw) return false;
             try {
-                const d = JSON.parse(raw);
-                cola = d.cola ?? 0; totalAllTime = d.totalAllTime ?? 0; clickPower = d.clickPower ?? 1;
-                quantumOwned = d.quantumOwned ?? false; autoSiphon = d.autoSiphon ?? 0; factory = d.factory ?? 0; megaTank = d.megaTank ?? 0;
-                rebirthLevel = d.rebirthLevel ?? 0; permanentBonus = d.permanentBonus ?? 0;
-                galaxyUpgrade = d.galaxyUpgrade ?? false; nebulaUpgrade = d.nebulaUpgrade ?? false;
-                stellarUpgrade = d.stellarUpgrade ?? false; cosmicUpgrade = d.cosmicUpgrade ?? false; omegaUpgrade = d.omegaUpgrade ?? false;
-                clickUpgradeLvl = d.clickUpgradeLvl ?? 0; clickCost = d.clickCost ?? 10; quantumCost = d.quantumCost ?? 450;
-                autoCost = d.autoCost ?? 30; factoryCost = d.factoryCost ?? 220; megaCost = d.megaCost ?? 1200;
-                galaxyCost = d.galaxyCost ?? 5000; nebulaCost = d.nebulaCost ?? 25000; stellarCost = d.stellarCost ?? 100000;
-                cosmicCost = d.cosmicCost ?? 500000; omegaCost = d.omegaCost ?? 2000000;
-                streak = d.streak ?? 0; streakMulti = d.streakMulti ?? 1.0; maxStreak = d.maxStreak ?? 0;
-                playTimeSeconds = d.playTimeSeconds ?? 0; nicknameCooldownUntil = d.nicknameCooldownUntil ?? 0; playerName = d.playerName ?? "";
+                const saved = JSON.parse(raw);
+                Object.assign(state, saved);
+                // Ensure arrays/objects exist
+                if(typeof state.galaxyUpgrade === 'undefined') state.galaxyUpgrade = false;
                 return true;
             } catch(e) { return false; }
         }
         
         function startPlayTimeTracking() {
             if(playTimeInterval) clearInterval(playTimeInterval);
-            playTimeInterval = setInterval(() => { playTimeSeconds++; updateStatsPanel(); }, 1000);
+            playTimeInterval = setInterval(() => { state.playTimeSeconds++; updateStatsPanel(); }, 1000);
         }
         
         function formatPlaytime(sec) {
@@ -526,11 +488,11 @@
             if(h > 0) return `${h}h ${m}m`; if(m > 0) return `${m}m ${s}s`; return `${s}s`;
         }
         
-        // Nickname cooldown
+        // Nickname & Leaderboard
         function getRemainingCooldown() {
             const now = Date.now();
-            if (nicknameCooldownUntil <= now) return null;
-            const remaining = nicknameCooldownUntil - now;
+            if (state.nicknameCooldownUntil <= now) return null;
+            const remaining = state.nicknameCooldownUntil - now;
             const days = Math.floor(remaining / 86400000);
             const hours = Math.floor((remaining % 86400000) / 3600000);
             if(days > 0) return `${days}d ${hours}h`;
@@ -542,35 +504,35 @@
             const input = document.getElementById("nicknameInput");
             const newName = input.value.trim();
             if(!newName) { showToast("❌ Enter a name!"); return; }
-            if (nicknameCooldownUntil > Date.now()) {
+            if (state.nicknameCooldownUntil > Date.now()) {
                 showToast(`⏳ Cooldown: ${getRemainingCooldown()}`);
                 return;
             }
-            playerName = newName.slice(0, 14);
-            localStorage.setItem("colaPlayer", playerName);
-            nicknameCooldownUntil = Date.now() + (3 * 86400000);
+            state.playerName = newName.slice(0, 14);
+            localStorage.setItem("colaPlayer", state.playerName);
+            state.nicknameCooldownUntil = Date.now() + (3 * 86400000);
             saveGame(false);
             updateStatsPanel();
             saveToLeaderboard();
             input.value = "";
-            showFloatingText(`✅ Name changed to ${playerName}!`, window.innerWidth/2, 100);
+            showFloatingText(`✅ Name changed to ${state.playerName}!`, window.innerWidth/2, 100);
             updateCooldownUI();
         }
         
         function updateCooldownUI() {
             const cooldownDiv = document.getElementById("cooldownDisplay");
-            const btn = document.getElementById("changeNicknameBtn");
+            const btn = document.querySelector("#settingsPanel button[onclick='attemptNicknameChange()']");
             const remaining = getRemainingCooldown();
             if(remaining) { cooldownDiv.innerText = `⏳ ${remaining} until next name change`; if(btn) btn.disabled = true; }
             else { cooldownDiv.innerText = "✅ You can change your nickname (3 days cooldown)"; if(btn) btn.disabled = false; }
         }
         
         function saveToLeaderboard() {
-            if(!playerName) return;
+            if(!state.playerName) return;
             let board = JSON.parse(localStorage.getItem("colaLeaderboard") || "[]");
-            let existing = board.find(p => p.name === playerName);
-            if(existing) existing.score = totalAllTime;
-            else board.push({ name: playerName, score: totalAllTime });
+            let existing = board.find(p => p.name === state.playerName);
+            if(existing) existing.score = state.totalAllTime;
+            else board.push({ name: state.playerName, score: state.totalAllTime });
             board.sort((a,b) => b.score - a.score);
             board = board.slice(0, 25);
             localStorage.setItem("colaLeaderboard", JSON.stringify(board));
@@ -590,59 +552,63 @@
         function escapeHtml(s) { return s.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
         
         function updateStatsPanel() {
-            document.getElementById("displayName").innerText = playerName || "???";
-            document.getElementById("statTotal").innerText = Math.floor(totalAllTime).toLocaleString();
-            document.getElementById("statRebirth").innerText = `${rebirthLevel}/5`;
-            document.getElementById("statBonus").innerText = `+${permanentBonus}%`;
-            document.getElementById("statMaxStreak").innerText = maxStreak;
-            document.getElementById("statPlaytime").innerText = formatPlaytime(playTimeSeconds);
+            document.getElementById("displayName").innerText = state.playerName || "???";
+            document.getElementById("statTotal").innerText = Math.floor(state.totalAllTime).toLocaleString();
+            document.getElementById("statRebirth").innerText = `${state.rebirthLevel}/5`;
+            document.getElementById("statBonus").innerText = `+${state.permanentBonus}%`;
+            document.getElementById("statMaxStreak").innerText = state.maxStreak;
+            document.getElementById("statPlaytime").innerText = formatPlaytime(state.playTimeSeconds);
             updateCooldownUI();
         }
         
-        // UI Update with prestige upgrades visibility
+        // UI Update (Full refresh)
         function updateUI() {
-            document.getElementById("colaCount").innerText = Math.floor(cola);
-            document.getElementById("allTime").innerText = Math.floor(totalAllTime);
-            document.getElementById("streakValue").innerText = streak;
-            document.getElementById("streakMult").innerText = streakMulti.toFixed(2);
-            document.getElementById("rebirthTier").innerText = rebirthLevel;
-            document.getElementById("globalBonus").innerText = permanentBonus;
+            document.getElementById("colaCount").innerText = Math.floor(state.cola);
+            document.getElementById("allTime").innerText = Math.floor(state.totalAllTime);
+            document.getElementById("streakValue").innerText = state.streak;
+            document.getElementById("streakMult").innerText = state.streakMulti.toFixed(2);
+            document.getElementById("rebirthTier").innerText = state.rebirthLevel;
+            document.getElementById("globalBonus").innerText = state.permanentBonus;
             
-            document.getElementById("clickCost").innerText = clickCost;
-            document.getElementById("quantumCost").innerText = quantumCost;
-            document.getElementById("autoCost").innerText = autoCost;
-            document.getElementById("factoryCost").innerText = factoryCost;
-            document.getElementById("megaCost").innerText = megaCost;
+            document.getElementById("clickCost").innerText = state.clickCost;
+            document.getElementById("quantumCost").innerText = state.quantumCost;
+            document.getElementById("autoCost").innerText = state.autoCost;
+            document.getElementById("factoryCost").innerText = state.factoryCost;
+            document.getElementById("megaCost").innerText = state.megaCost;
+            document.getElementById("galaxyCost").innerText = state.galaxyCost;
+            document.getElementById("nebulaCost").innerText = state.nebulaCost;
+            document.getElementById("stellarCost").innerText = state.stellarCost;
+            document.getElementById("cosmicCost").innerText = state.cosmicCost;
+            document.getElementById("omegaCost").innerText = state.omegaCost;
             
-            // Show prestige upgrades based on rebirth level (each rebirth unlocks new tier)
-            document.getElementById("prestigeDiv1").style.display = rebirthLevel >= 1 ? "block" : "none";
-            document.getElementById("prestigeUpgrades1").style.display = rebirthLevel >= 1 ? "block" : "none";
-            document.getElementById("prestigeDiv2").style.display = rebirthLevel >= 2 ? "block" : "none";
-            document.getElementById("prestigeUpgrades2").style.display = rebirthLevel >= 2 ? "block" : "none";
-            document.getElementById("prestigeDiv3").style.display = rebirthLevel >= 3 ? "block" : "none";
-            document.getElementById("prestigeUpgrades3").style.display = rebirthLevel >= 3 ? "block" : "none";
-            document.getElementById("prestigeDiv4").style.display = rebirthLevel >= 4 ? "block" : "none";
-            document.getElementById("prestigeUpgrades4").style.display = rebirthLevel >= 4 ? "block" : "none";
-            document.getElementById("prestigeDiv5").style.display = rebirthLevel >= 5 ? "block" : "none";
-            document.getElementById("prestigeUpgrades5").style.display = rebirthLevel >= 5 ? "block" : "none";
+            // Show prestige upgrades based on rebirth level
+            const show1 = state.rebirthLevel >= 1;
+            const show2 = state.rebirthLevel >= 2;
+            const show3 = state.rebirthLevel >= 3;
+            const show4 = state.rebirthLevel >= 4;
+            const show5 = state.rebirthLevel >= 5;
+            document.getElementById("prestigeDiv1").style.display = show1 ? "block" : "none";
+            document.getElementById("upgrade1").style.display = show1 ? "block" : "none";
+            document.getElementById("prestigeDiv2").style.display = show2 ? "block" : "none";
+            document.getElementById("upgrade2").style.display = show2 ? "block" : "none";
+            document.getElementById("prestigeDiv3").style.display = show3 ? "block" : "none";
+            document.getElementById("upgrade3").style.display = show3 ? "block" : "none";
+            document.getElementById("prestigeDiv4").style.display = show4 ? "block" : "none";
+            document.getElementById("upgrade4").style.display = show4 ? "block" : "none";
+            document.getElementById("prestigeDiv5").style.display = show5 ? "block" : "none";
+            document.getElementById("upgrade5").style.display = show5 ? "block" : "none";
             
-            document.getElementById("galaxyCost").innerText = galaxyCost;
-            document.getElementById("nebulaCost").innerText = nebulaCost;
-            document.getElementById("stellarCost").innerText = stellarCost;
-            document.getElementById("cosmicCost").innerText = cosmicCost;
-            document.getElementById("omegaCost").innerText = omegaCost;
-            
-            // Rebirth panel requirements (HARDER: exponential requirements)
+            // Rebirth panel requirements (HARDER: exponential)
             const reqs = [0, 25000, 250000, 2000000, 15000000, 100000000];
-            let req = reqs[rebirthLevel + 1] || 0;
+            let req = reqs[state.rebirthLevel + 1] || 0;
             let rebirthDesc = document.getElementById("rebirthDesc");
             let rebirthBtn = document.getElementById("rebirthBtn");
             let reqDiv = document.getElementById("rebirthReq");
-            if(rebirthLevel < 5) {
+            if(state.rebirthLevel < 5) {
                 let tierNames = ["", "GALAXY", "NEBULA", "STELLAR", "COSMIC", "OMEGA"];
-                rebirthDesc.innerHTML = `<strong>🌀 ${tierNames[rebirthLevel+1]} REBIRTH</strong><br>+50% permanent bonus<br>Requires ${req.toLocaleString()} total cola<br>Unlocks new ultra upgrades!`;
-                rebirthBtn.disabled = !(totalAllTime >= req);
-                reqDiv.innerText = totalAllTime >= req ? "✅ READY TO ASCEND!" : `Need ${(req - totalAllTime).toLocaleString()} more cola`;
+                rebirthDesc.innerHTML = `<strong>🌀 ${tierNames[state.rebirthLevel+1]} REBIRTH</strong><br>+50% permanent bonus<br>Requires ${req.toLocaleString()} total cola<br>Unlocks new ultra upgrades!`;
+                rebirthBtn.disabled = !(state.totalAllTime >= req);
+                reqDiv.innerText = state.totalAllTime >= req ? "✅ READY TO ASCEND!" : `Need ${(req - state.totalAllTime).toLocaleString()} more cola`;
             } else {
                 rebirthDesc.innerHTML = `<strong>✨ OMEGA LEGEND</strong><br>Maximum rebirth achieved!<br>You are the Cola God.`;
                 rebirthBtn.disabled = true;
@@ -650,60 +616,67 @@
             }
             
             colaElement.innerText = getColaIcon();
-            document.body.setAttribute("data-rebirth", rebirthLevel);
+            document.body.setAttribute("data-rebirth", Math.min(state.rebirthLevel, 5));
             updateStatsPanel();
             saveToLeaderboard();
         }
         
-        // ========== UPGRADE BUY FUNCTIONS ==========
-        function buyClickUpgrade() { if(cola >= clickCost) { cola -= clickCost; clickPower++; clickCost = Math.floor(10 + clickPower * 6); playUpgradeSound(); updateUI(); } else showFloatingText("❌ Not enough",0,0); }
-        function buyQuantum() { if(!quantumOwned && cola >= quantumCost) { cola -= quantumCost; quantumOwned = true; playUpgradeSound(); updateUI(); } else showFloatingText("❌ Need cola",0,0); }
-        function buyAuto() { if(cola >= autoCost) { cola -= autoCost; autoSiphon++; autoCost = Math.floor(30 + autoSiphon * 12); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); }
-        function buyFactory() { if(cola >= factoryCost) { cola -= factoryCost; factory++; factoryCost = Math.floor(220 + factory * 40); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); }
-        function buyMega() { if(cola >= megaCost) { cola -= megaCost; megaTank++; megaCost = Math.floor(1200 + megaTank * 200); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); }
+        // ========== UPGRADE BUY FUNCTIONS (with proper checks) ==========
+        window.buyClickUpgrade = function() { if(state.cola >= state.clickCost) { state.cola -= state.clickCost; state.clickPower++; state.clickCost = Math.floor(10 + state.clickPower * 6); playUpgradeSound(); updateUI(); } else showFloatingText("❌ Not enough",0,0); };
+        window.buyQuantum = function() { if(!state.quantumOwned && state.cola >= state.quantumCost) { state.cola -= state.quantumCost; state.quantumOwned = true; playUpgradeSound(); updateUI(); } else showFloatingText("❌ Need cola",0,0); };
+        window.buyAuto = function() { if(state.cola >= state.autoCost) { state.cola -= state.autoCost; state.autoSiphon++; state.autoCost = Math.floor(30 + state.autoSiphon * 12); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); };
+        window.buyFactory = function() { if(state.cola >= state.factoryCost) { state.cola -= state.factoryCost; state.factory++; state.factoryCost = Math.floor(220 + state.factory * 40); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); };
+        window.buyMega = function() { if(state.cola >= state.megaCost) { state.cola -= state.megaCost; state.megaTank++; state.megaCost = Math.floor(1200 + state.megaTank * 200); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); };
         
-        function buyGalaxyUpgrade() { if(!galaxyUpgrade && cola >= galaxyCost && rebirthLevel >= 1) { cola -= galaxyCost; galaxyUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("🌌 Galaxy Surge UNLOCKED! 2x click power",0,0); } else showFloatingText("❌ Need Tier 1 Rebirth or cola",0,0); }
-        function buyNebulaUpgrade() { if(!nebulaUpgrade && cola >= nebulaCost && rebirthLevel >= 2) { cola -= nebulaCost; nebulaUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("💫 Nebula Echo UNLOCKED! Auto x3",0,0); } else showFloatingText("❌ Need Tier 2 Rebirth",0,0); }
-        function buyStellarUpgrade() { if(!stellarUpgrade && cola >= stellarCost && rebirthLevel >= 3) { cola -= stellarCost; stellarUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("✨ Stellar Blessing! +100% global",0,0); } else showFloatingText("❌ Need Tier 3",0,0); }
-        function buyCosmicUpgrade() { if(!cosmicUpgrade && cola >= cosmicCost && rebirthLevel >= 4) { cola -= cosmicCost; cosmicUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("👑 Cosmic Overlord! Streak x1.5",0,0); } else showFloatingText("❌ Need Tier 4",0,0); }
-        function buyOmegaUpgrade() { if(!omegaUpgrade && cola >= omegaCost && rebirthLevel >= 5) { cola -= omegaCost; omegaUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("🏆 OMEGA FINALE! All bonuses doubled",0,0); } else showFloatingText("❌ Need Tier 5",0,0); }
+        window.buyGalaxyUpgrade = function() { if(!state.galaxyUpgrade && state.cola >= state.galaxyCost && state.rebirthLevel >= 1) { state.cola -= state.galaxyCost; state.galaxyUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("🌌 Galaxy Surge UNLOCKED!",0,0); } else showFloatingText("❌ Need Tier 1 Rebirth or cola",0,0); };
+        window.buyNebulaUpgrade = function() { if(!state.nebulaUpgrade && state.cola >= state.nebulaCost && state.rebirthLevel >= 2) { state.cola -= state.nebulaCost; state.nebulaUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("💫 Nebula Echo UNLOCKED!",0,0); } else showFloatingText("❌ Need Tier 2",0,0); };
+        window.buyStellarUpgrade = function() { if(!state.stellarUpgrade && state.cola >= state.stellarCost && state.rebirthLevel >= 3) { state.cola -= state.stellarCost; state.stellarUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("✨ Stellar Blessing!",0,0); } else showFloatingText("❌ Need Tier 3",0,0); };
+        window.buyCosmicUpgrade = function() { if(!state.cosmicUpgrade && state.cola >= state.cosmicCost && state.rebirthLevel >= 4) { state.cola -= state.cosmicCost; state.cosmicUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("👑 Cosmic Overlord!",0,0); } else showFloatingText("❌ Need Tier 4",0,0); };
+        window.buyOmegaUpgrade = function() { if(!state.omegaUpgrade && state.cola >= state.omegaCost && state.rebirthLevel >= 5) { state.cola -= state.omegaCost; state.omegaUpgrade = true; playUpgradeSound(); updateUI(); showFloatingText("🏆 OMEGA FINALE!",0,0); } else showFloatingText("❌ Need Tier 5",0,0); };
         
-        // ========== REBIRTH ==========
-        function performRebirth() {
+        // Rebirth
+        window.performRebirth = function() {
             const reqs = [0, 25000, 250000, 2000000, 15000000, 100000000];
-            let nextReq = reqs[rebirthLevel + 1];
-            if(rebirthLevel >= 5 || totalAllTime < nextReq) { showToast("❌ Cannot ascend yet!"); return; }
-            if(!confirm(`🌀 ASCEND TO TIER ${rebirthLevel+1}?\n+50% permanent bonus\nAll upgrades reset, but you keep total cola & relics.\nThe journey gets HARDER!`)) return;
+            let nextReq = reqs[state.rebirthLevel + 1];
+            if(state.rebirthLevel >= 5 || state.totalAllTime < nextReq) { showToast("❌ Cannot ascend yet!"); return; }
+            if(!confirm(`🌀 ASCEND TO TIER ${state.rebirthLevel+1}?\n+50% permanent bonus\nAll core upgrades reset, but you keep total cola & relics.\nThe journey gets HARDER!`)) return;
             
-            // Reset progress (keep permanent bonus and rebirth level)
-            cola = 0;
-            clickPower = 1;
-            quantumOwned = false;
-            autoSiphon = 0; factory = 0; megaTank = 0;
-            clickUpgradeLvl = 0; clickCost = 10; quantumCost = 450;
-            autoCost = 30; factoryCost = 220; megaCost = 1200;
-            streak = 0; streakMulti = 1.0;
-            // Note: Prestige upgrades are NOT reset (they stay unlocked)
+            // Reset core progress (keep permanent bonus, rebirth level, prestige upgrades, totalAllTime)
+            state.cola = 0;
+            state.clickPower = 1;
+            state.quantumOwned = false;
+            state.autoSiphon = 0;
+            state.factory = 0;
+            state.megaTank = 0;
+            state.clickUpgradeLvl = 0;
+            state.clickCost = 10;
+            state.quantumCost = 450;
+            state.autoCost = 30;
+            state.factoryCost = 220;
+            state.megaCost = 1200;
+            state.streak = 0;
+            state.streakMulti = 1.0;
             
-            permanentBonus += 50;
-            rebirthLevel++;
+            state.permanentBonus += 50;
+            state.rebirthLevel++;
             
             colaElement.classList.add("rebirth-ascend");
             setTimeout(() => colaElement.classList.remove("rebirth-ascend"), 700);
             playUpgradeSound();
             updateUI();
             closeAllPanels();
-            showFloatingText(`🌀 REBIRTH ${rebirthLevel}! +50% permanent bonus`, window.innerWidth/2, 150);
+            showFloatingText(`🌀 REBIRTH ${state.rebirthLevel}! +50% permanent bonus`, window.innerWidth/2, 150);
             restartIdleTimer();
             saveGame(false);
-        }
+        };
         
+        // Click handler
         function handleColaClick(e) {
             if(locked) { showToast("⛔ Locked!"); return; }
             if(!antiClickCheck()) return;
             let gain = getClickGain();
-            cola += gain;
-            totalAllTime += gain;
+            state.cola += gain;
+            state.totalAllTime += gain;
             updateStreak();
             restartIdleTimer();
             playSFX();
@@ -714,10 +687,10 @@
             updateUI();
         }
         
-        // Auto income
+        // Auto income loop
         setInterval(() => {
             let inc = getAutoIncome();
-            if(inc > 0 && !locked) { cola += inc; totalAllTime += inc; updateUI(); }
+            if(inc > 0 && !locked) { state.cola += inc; state.totalAllTime += inc; updateUI(); }
         }, 1000);
         
         // Silent auto-save every second
@@ -730,21 +703,22 @@
         window.toggleMusic = function() { musicOn = !musicOn; musicOn ? music.play().catch(e=>{}) : music.pause(); };
         window.toggleSFX = function() { sfxOn = !sfxOn; };
         window.manualSave = function() { saveGame(false); };
-        window.manualReset = function() { if(confirm("RESET EVERYTHING?")) { localStorage.clear(); location.reload(); } };
+        window.manualReset = function() { if(confirm("RESET EVERYTHING? This cannot be undone!")) { localStorage.clear(); location.reload(); } };
         window.attemptNicknameChange = attemptNicknameChange;
-        window.buyGalaxyUpgrade = buyGalaxyUpgrade; window.buyNebulaUpgrade = buyNebulaUpgrade;
-        window.buyStellarUpgrade = buyStellarUpgrade; window.buyCosmicUpgrade = buyCosmicUpgrade; window.buyOmegaUpgrade = buyOmegaUpgrade;
-        window.buyClickUpgrade = buyClickUpgrade; window.buyQuantum = buyQuantum; window.buyAuto = buyAuto; window.buyFactory = buyFactory; window.buyMega = buyMega;
-        window.performRebirth = performRebirth;
         
         document.getElementById("volSlider").addEventListener("input", (e) => { volume = parseFloat(e.target.value); music.volume = volume; });
         colaElement.addEventListener("click", handleColaClick);
         
-        // Init
+        // Initialize
         loadGame();
         startPlayTimeTracking();
-        if(!playerName) { playerName = prompt("Enter your name (Legend):", "ColaMaster") || "ColaMaster"; playerName = playerName.slice(0,14); nicknameCooldownUntil = 0; saveGame(false); }
-        localStorage.setItem("colaPlayer", playerName);
+        if(!state.playerName) {
+            state.playerName = prompt("Enter your name (Legend):", "ColaMaster") || "ColaMaster";
+            state.playerName = state.playerName.slice(0,14);
+            state.nicknameCooldownUntil = 0;
+            saveGame(false);
+        }
+        localStorage.setItem("colaPlayer", state.playerName);
         let storedBoard = localStorage.getItem("colaLeaderboard");
         if(storedBoard) leaderboard = JSON.parse(storedBoard);
         renderLeaderboard();
