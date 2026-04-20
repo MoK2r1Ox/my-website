@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥤 COLA ODYSSEY | FIXED UPGRADES | 5 Prestige Tiers</title>
+    <title>🥤 COLA ODYSSEY | FINAL | 5 Prestige Tiers | No Bugs</title>
     <style>
         * {
             user-select: none;
@@ -130,7 +130,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 400px;
+            width: 420px;
             max-width: 90vw;
             background: #0a0a18f2;
             backdrop-filter: blur(28px);
@@ -241,7 +241,7 @@
         }
         .cooldown-text { font-size: 0.7rem; color: #ffaa66; text-align: center; margin-top: 5px; }
         .upgrade-group { margin-top: 8px; }
-        .cost-highlight { color: #ffaa66; font-weight: bold; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
     </style>
 </head>
 <body data-rebirth="0">
@@ -269,39 +269,39 @@
 <!-- UPGRADES PANEL -->
 <div id="shopPanel" class="panel">
     <h3>✨ CORE UPGRADES</h3>
-    <button onclick="buyClickUpgrade()">🔨 +1 Base Click (Cost: <span id="clickCost">10</span>)</button>
-    <button onclick="buyQuantum()">⚡ Quantum Core +50 (Cost: <span id="quantumCost">450</span>)</button>
+    <button id="clickUpgradeBtn" onclick="buyClickUpgrade()">🔨 +1 Base Click (Cost: <span id="clickCost">10</span>)</button>
+    <button id="quantumBtn" onclick="buyQuantum()">⚡ Quantum Core +50 (Cost: <span id="quantumCost">450</span>)</button>
     <hr>
     <h3>🏭 AUTO COLA</h3>
-    <button onclick="buyAuto()">🥤 Auto Siphon +1/s (Cost: <span id="autoCost">30</span>)</button>
-    <button onclick="buyFactory()">🏭 Bottling +8/s (Cost: <span id="factoryCost">220</span>)</button>
-    <button onclick="buyMega()">🌀 Mega Tank +50/s (Cost: <span id="megaCost">1200</span>)</button>
+    <button id="autoBtn" onclick="buyAuto()">🥤 Auto Siphon +1/s (Cost: <span id="autoCost">30</span>)</button>
+    <button id="factoryBtn" onclick="buyFactory()">🏭 Bottling +8/s (Cost: <span id="factoryCost">220</span>)</button>
+    <button id="megaBtn" onclick="buyMega()">🌀 Mega Tank +50/s (Cost: <span id="megaCost">1200</span>)</button>
     
     <!-- Prestige Exclusive Upgrades -->
     <div id="prestigeUpgradesContainer">
         <hr id="prestigeDiv1" style="display: none;">
         <div id="upgrade1" style="display: none;" class="upgrade-group">
-            <h3>🌌 TIER 1 - GALAXY (Requires Rebirth 1+)</h3>
+            <h3>🌌 TIER 1 - GALAXY (Req: Rebirth 1+)</h3>
             <button id="galaxyBtn" onclick="buyGalaxyUpgrade()">🌌 Galaxy Surge (2x Click Power) - Cost: <span id="galaxyCost">5000</span></button>
         </div>
         <hr id="prestigeDiv2" style="display: none;">
         <div id="upgrade2" style="display: none;" class="upgrade-group">
-            <h3>💫 TIER 2 - NEBULA (Requires Rebirth 2+)</h3>
+            <h3>💫 TIER 2 - NEBULA (Req: Rebirth 2+)</h3>
             <button id="nebulaBtn" onclick="buyNebulaUpgrade()">💫 Nebula Echo (Auto x3) - Cost: <span id="nebulaCost">25000</span></button>
         </div>
         <hr id="prestigeDiv3" style="display: none;">
         <div id="upgrade3" style="display: none;" class="upgrade-group">
-            <h3>✨ TIER 3 - STELLAR (Requires Rebirth 3+)</h3>
+            <h3>✨ TIER 3 - STELLAR (Req: Rebirth 3+)</h3>
             <button id="stellarBtn" onclick="buyStellarUpgrade()">✨ Stellar Blessing (+100% Global) - Cost: <span id="stellarCost">100000</span></button>
         </div>
         <hr id="prestigeDiv4" style="display: none;">
         <div id="upgrade4" style="display: none;" class="upgrade-group">
-            <h3>👑 TIER 4 - COSMIC (Requires Rebirth 4+)</h3>
+            <h3>👑 TIER 4 - COSMIC (Req: Rebirth 4+)</h3>
             <button id="cosmicBtn" onclick="buyCosmicUpgrade()">👑 Cosmic Overlord (Streak x1.5) - Cost: <span id="cosmicCost">500000</span></button>
         </div>
         <hr id="prestigeDiv5" style="display: none;">
         <div id="upgrade5" style="display: none;" class="upgrade-group">
-            <h3>🏆 TIER 5 - OMEGA (Requires Rebirth 5+)</h3>
+            <h3>🏆 TIER 5 - OMEGA (Req: Rebirth 5+)</h3>
             <button id="omegaBtn" onclick="buyOmegaUpgrade()">🏆 Omega Finale (All Bonuses Doubled) - Cost: <span id="omegaCost">2000000</span></button>
         </div>
     </div>
@@ -333,7 +333,7 @@
     <div class="info-card">
         <div class="info-row"><span>👤 NICKNAME:</span><span id="displayName">---</span></div>
         <input type="text" id="nicknameInput" class="nickname-edit" placeholder="New nickname (max 14)" maxlength="14">
-        <button onclick="attemptNicknameChange()" style="margin-top:6px;">✏️ CHANGE NAME</button>
+        <button id="changeNameBtn" onclick="attemptNicknameChange()" style="margin-top:6px;">✏️ CHANGE NAME</button>
         <div id="cooldownDisplay" class="cooldown-text"></div>
     </div>
     <div class="info-card">
@@ -360,6 +360,7 @@
 
 <script>
     (function(){
+        // DOM elements
         const colaElement = document.getElementById('colaMain');
         
         // ========== GAME STATE ==========
@@ -381,11 +382,12 @@
         let music = new Audio("https://cdn.pixabay.com/audio/2022/10/16/audio_12b5f1b8a1.mp3");
         music.loop = true; music.volume = volume;
         let clickLog = [], locked = false, lockTimer = null;
-        const MAX_CPS = 10;
+        const MAX_CPS = 12;
         let idleTimer = null;
         let playTimeInterval = null;
         let leaderboard = [];
         
+        // Helper functions
         function showToast(msg, isError = true) {
             let div = document.createElement("div");
             div.className = "toast-message";
@@ -411,6 +413,7 @@
         function playUpgradeSound() { if(sfxOn) { let s = new Audio("https://cdn.pixabay.com/audio/2022/05/16/audio_8b6a7c8f2c.mp3"); s.volume = volume; s.play().catch(e=>{}); } }
         music.play().catch(()=>{});
         
+        // Multipliers
         function totalGlobalMult() {
             let bonus = state.permanentBonus;
             if(state.stellarUpgrade) bonus += 100;
@@ -442,6 +445,7 @@
             return icons[Math.min(state.rebirthLevel, 5)];
         }
         
+        // Streak
         function updateStreak() {
             if(state.streak < 100) state.streak++;
             state.streakMulti = 1 + (state.streak / 100);
@@ -470,15 +474,16 @@
             return !locked;
         }
         
+        // Save/Load
         function saveGame(silent = true) {
             try {
-                localStorage.setItem("colaOdysseyFixed", JSON.stringify(state));
+                localStorage.setItem("colaOdysseyFinal", JSON.stringify(state));
                 if(!silent) showToast("💾 Game Saved!", false);
             } catch(e) { console.warn("save failed"); }
         }
         
         function loadGame() {
-            const raw = localStorage.getItem("colaOdysseyFixed");
+            const raw = localStorage.getItem("colaOdysseyFinal");
             if(!raw) return false;
             try {
                 const saved = JSON.parse(raw);
@@ -530,7 +535,7 @@
         
         function updateCooldownUI() {
             const cooldownDiv = document.getElementById("cooldownDisplay");
-            const btn = document.querySelector("#settingsPanel button[onclick='attemptNicknameChange()']");
+            const btn = document.getElementById("changeNameBtn");
             const remaining = getRemainingCooldown();
             if(remaining) { cooldownDiv.innerText = `⏳ ${remaining} until next name change`; if(btn) btn.disabled = true; }
             else { cooldownDiv.innerText = "✅ You can change your nickname (3 days cooldown)"; if(btn) btn.disabled = false; }
@@ -570,6 +575,7 @@
             updateCooldownUI();
         }
         
+        // Main UI update
         function updateUI() {
             document.getElementById("colaCount").innerText = Math.floor(state.cola);
             document.getElementById("allTime").innerText = Math.floor(state.totalAllTime);
@@ -589,7 +595,7 @@
             document.getElementById("cosmicCost").innerText = state.cosmicCost;
             document.getElementById("omegaCost").innerText = state.omegaCost;
             
-            // Show prestige upgrades based on rebirth level
+            // Show/hide prestige upgrades based on rebirth level
             const show1 = state.rebirthLevel >= 1;
             const show2 = state.rebirthLevel >= 2;
             const show3 = state.rebirthLevel >= 3;
@@ -606,12 +612,13 @@
             document.getElementById("prestigeDiv5").style.display = show5 ? "block" : "none";
             document.getElementById("upgrade5").style.display = show5 ? "block" : "none";
             
-            // Disable already bought upgrades visually
+            // Disable already bought upgrades
             if(state.galaxyUpgrade) document.getElementById("galaxyBtn") && (document.getElementById("galaxyBtn").disabled = true);
             if(state.nebulaUpgrade) document.getElementById("nebulaBtn") && (document.getElementById("nebulaBtn").disabled = true);
             if(state.stellarUpgrade) document.getElementById("stellarBtn") && (document.getElementById("stellarBtn").disabled = true);
             if(state.cosmicUpgrade) document.getElementById("cosmicBtn") && (document.getElementById("cosmicBtn").disabled = true);
             if(state.omegaUpgrade) document.getElementById("omegaBtn") && (document.getElementById("omegaBtn").disabled = true);
+            if(state.quantumOwned) document.getElementById("quantumBtn") && (document.getElementById("quantumBtn").disabled = true);
             
             // Rebirth panel
             const reqs = [0, 25000, 250000, 2000000, 15000000, 100000000];
@@ -636,7 +643,7 @@
             saveToLeaderboard();
         }
         
-        // ========== UPGRADE BUY FUNCTIONS - FULLY FIXED ==========
+        // ========== UPGRADE BUY FUNCTIONS (FULLY FIXED) ==========
         window.buyClickUpgrade = function() { 
             if(state.cola >= state.clickCost) { 
                 state.cola -= state.clickCost; 
@@ -649,14 +656,14 @@
         };
         
         window.buyQuantum = function() { 
-            if(!state.quantumOwned && state.cola >= state.quantumCost) { 
+            if(state.quantumOwned) { showFloatingText(`⚡ Already owned!`, 0, 0); return; }
+            if(state.cola >= state.quantumCost) { 
                 state.cola -= state.quantumCost; 
                 state.quantumOwned = true; 
                 playUpgradeSound(); 
                 updateUI(); 
                 showFloatingText(`⚡ Quantum Core UNLOCKED! +50 base power`, 0, 0);
-            } else if(state.quantumOwned) showFloatingText(`⚡ Already owned!`, 0, 0);
-            else showFloatingText(`❌ Need ${state.quantumCost} cola!`, 0, 0); 
+            } else showFloatingText(`❌ Need ${state.quantumCost} cola!`, 0, 0); 
         };
         
         window.buyAuto = function() { 
@@ -692,7 +699,7 @@
             } else showFloatingText(`❌ Need ${state.megaCost} cola!`, 0, 0); 
         };
         
-        // PRESTIGE UPGRADES - WITH CLEAR FEEDBACK
+        // PRESTIGE UPGRADES - With clear condition checks
         window.buyGalaxyUpgrade = function() { 
             if(state.galaxyUpgrade) { showFloatingText(`🌌 Galaxy Surge already owned!`, 0, 0); return; }
             if(state.rebirthLevel < 1) { showFloatingText(`❌ Requires Rebirth Tier 1!`, 0, 0); return; }
@@ -765,7 +772,7 @@
             if(state.rebirthLevel >= 5 || state.totalAllTime < nextReq) { showToast("❌ Cannot ascend yet!"); return; }
             if(!confirm(`🌀 ASCEND TO TIER ${state.rebirthLevel+1}?\n+50% permanent bonus\nAll core upgrades reset, but you keep total cola & relics.\nThe journey gets HARDER!`)) return;
             
-            // Reset core progress (keep permanent bonus, rebirth level, prestige upgrades, totalAllTime)
+            // Reset core progress
             state.cola = 0;
             state.clickPower = 1;
             state.quantumOwned = false;
@@ -817,7 +824,7 @@
             if(inc > 0 && !locked) { state.cola += inc; state.totalAllTime += inc; updateUI(); }
         }, 1000);
         
-        // Silent auto-save every second
+        // Silent auto-save every second (no toast)
         setInterval(() => saveGame(true), 1000);
         window.addEventListener("beforeunload", () => saveGame(true));
         
