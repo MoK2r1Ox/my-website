@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Coke Clicker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #111;
+      color: #fff;
+    }
+    h1 {
+      color: #e61c2d;
+    }
+    button {
+      padding: 15px 25px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+      border: none;
+      border-radius: 8px;
+    }
+    #clickBtn {
+      background: #e61c2d;
+      color: white;
+    }
+    #upgradeBtn {
+      background: #444;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🥤 Coke Clicker</h1>
+  <h2>Cokes: <span id="score">0</span></h2>
+
+  <button id="clickBtn">Drink Coke (+1)</button>
+  <br>
+  <button id="upgradeBtn">Buy Auto-Drinker (Cost: 10)</button>
+
+  <script>
+    let score = 0;
+    let autoClickers = 0;
+    let cost = 10;
+
+    const scoreDisplay = document.getElementById("score");
+    const clickBtn = document.getElementById("clickBtn");
+    const upgradeBtn = document.getElementById("upgradeBtn");
+
+    clickBtn.onclick = () => {
+      score++;
+      update();
+    };
+
+    upgradeBtn.onclick = () => {
+      if (score >= cost) {
+        score -= cost;
+        autoClickers++;
+        cost = Math.floor(cost * 1.5);
+        update();
+      }
+    };
+
+    function update() {
+      scoreDisplay.textContent = score;
+      upgradeBtn.textContent = `Buy Auto-Drinker (Cost: ${cost})`;
+    }
+
+    // Auto click every second
+    setInterval(() => {
+      score += autoClickers;
+      update();
+    }, 1000);
+  </script>
+
+</body>
+</html>
