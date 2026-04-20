@@ -1,7 +1,256 @@
 <!DOCTYPE html>
-<html>
-<body style="background:black;color:white;text-align:center;">
-<h1>IT WORKS 🥤</h1>
-<button onclick="alert('OK')">Test</button>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cola Clicker Deluxe</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: radial-gradient(circle, #1a1a1a, #000);
+  color: white;
+  overflow: hidden;
+}
+
+/* TOP BAR */
+#top {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+button {
+  margin: 5px;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: #333;
+  color: white;
+  cursor: pointer;
+}
+
+/* CENTER */
+#main {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+#cola {
+  font-size: 140px;
+  cursor: pointer;
+  transition: transform 0.1s;
+  user-select: none;
+}
+
+#cola:active {
+  transform: scale(0.9);
+}
+
+/* FLOAT */
+.float {
+  position: absolute;
+  color: #00ff88;
+  font-size: 20px;
+  animation: floatUp 1s forwards;
+}
+
+@keyframes floatUp {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-100px); }
+}
+
+/* PANELS */
+.panel {
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  width: 260px;
+  background: #222;
+  padding: 10px;
+  border-radius: 10px;
+  display: none;
+}
+
+/* STREAK */
+#streak {
+  position: absolute;
+  bottom: 20px;
+  font-size: 18px;
+  color: gold;
+}
+</style>
+</head>
+
+<body>
+
+<div id="top">
+  <button onclick="openTab('shop')">Upgrades</button>
+  <button onclick="openTab('settings')">Settings</button>
+  <button onclick="openTab('leader')">Leaderboard</button>
+  <button onclick="prestige()">Prestige ⭐</button>
+</div>
+
+<div id="shop" class="panel">
+  <h3>Upgrades</h3>
+  <button onclick="buyClick()">+1 Click (10)</button>
+  <button onclick="buyAuto()">Auto Cola (25)</button>
+</div>
+
+<div id="settings" class="panel">
+  <h3>Settings</h3>
+  <p>All-time cola: <span id="allTime">0</span></p>
+  <p>Prestige: <span id="prestige">0</span></p>
+</div>
+
+<div id="leader" class="panel">
+  <h3>Top Cola Players</h3>
+  <div id="board"></div>
+</div>
+
+<div id="main">
+  <div id="cola">🥤</div>
+</div>
+
+<div id="streak">Streak: 0x</div>
+
+<script>
+let cola = 0;
+let allTime = 0;
+let clickPower = 1;
+let auto = 0;
+let prestigeLevel = 0;
+
+/* 🔥 STREAK SYSTEM */
+let streak = 0;
+let lastClick = 0;
+
+const colaBtn = document.getElementById("cola");
+
+colaBtn.onclick = (e) => {
+  let now = Date.now();
+
+  // streak logic
+  if (now - lastClick < 600) {
+    streak++;
+  } else {
+    streak = 1;
+  }
+  lastClick = now;
+
+  let multiplier = 1 + Math.floor(streak / 5);
+
+  let gain = clickPower * multiplier;
+
+  cola += gain;
+  allTime += gain;
+
+  showFloat(e, "+" + gain);
+
+  document.getElementById("streak").innerText = "Streak: " + multiplier + "x";
+
+  update();
+};
+
+function showFloat(e, text){
+  let f = document.createElement("div");
+  f.className = "float";
+  f.innerText = text;
+  f.style.left = e.pageX + "px";
+  f.style.top = e.pageY + "px";
+  document.body.appendChild(f);
+  setTimeout(()=>f.remove(),1000);
+}
+
+/* UPGRADES */
+function buyClick(){
+  if(cola >= 10){
+    cola -= 10;
+    clickPower++;
+    update();
+  }
+}
+
+function buyAuto(){
+  if(cola >= 25){
+    cola -= 25;
+    auto++;
+    update();
+  }
+}
+
+/* AUTO */
+setInterval(()=>{
+  cola += auto;
+  allTime += auto;
+  update();
+},1000);
+
+/* PANELS */
+function openTab(id){
+  ["shop","settings","leader"].forEach(p=>{
+    document.getElementById(p).style.display = "none";
+  });
+  document.getElementById(id).style.display = "block";
+}
+
+/* LEADERBOARD (LOCAL TOP 100 SIM) */
+function updateBoard(){
+  let fake = [
+    ["You", allTime],
+    ["Player2", 5000],
+    ["Player3", 3000]
+  ];
+
+  fake.sort((a,b)=>b[1]-a[1]);
+
+  document.getElementById("board").innerHTML =
+    fake.map(p=>`<p>${p[0]} - ${p[1]}</p>`).join("");
+}
+
+/* PRESTIGE */
+function prestige(){
+  if(allTime >= 1000){
+    prestigeLevel++;
+    cola = 0;
+    clickPower = 1 + prestigeLevel;
+    auto = 0;
+    allTime = 0;
+    alert("Prestiged! Cola became GOLD COLA ⭐");
+    update();
+  }
+}
+
+/* UPDATE */
+function update(){
+  document.getElementById("allTime").innerText = allTime;
+  document.getElementById("prestige").innerText = prestigeLevel;
+  updateBoard();
+}
+
+/* SAVE */
+setInterval(()=>{
+  localStorage.setItem("colaSave", JSON.stringify({
+    cola, allTime, clickPower, auto, prestigeLevel
+  }));
+},2000);
+
+/* LOAD */
+window.onload = ()=>{
+  let save = JSON.parse(localStorage.getItem("colaSave"));
+  if(save){
+    cola = save.cola;
+    allTime = save.allTime;
+    clickPower = save.clickPower;
+    auto = save.auto;
+    prestigeLevel = save.prestigeLevel;
+  }
+  update();
+};
+</script>
+
 </body>
 </html>
