@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥤 Cola Streak Clicker | 100% Max Streak Bonus</title>
+    <title>🥤 Cola Prestige | Unlock New Upgrades</title>
     <style>
         * {
             user-select: none;
@@ -12,7 +12,7 @@
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', 'Poppins', 'Arial', sans-serif;
+            font-family: 'Segoe UI', 'Poppins', Arial, sans-serif;
             background: radial-gradient(circle at 30% 20%, #2c1a0c, #0f0702);
             color: white;
             overflow-x: hidden;
@@ -20,9 +20,9 @@
             transition: background 0.4s ease;
         }
 
-        /* Cola-themed backgrounds for prestige tiers */
+        /* Prestige background themes */
         body.prestige-0 { background: radial-gradient(circle at 30% 20%, #3e1a0a, #1a0a02); }
-        body.prestige-1 { background: radial-gradient(circle at 70% 40%, #6b2e1a, #2c0e02); box-shadow: inset 0 0 80px rgba(200,80,30,0.2); }
+        body.prestige-1 { background: radial-gradient(circle at 70% 40%, #5e2a18, #200d03); box-shadow: inset 0 0 80px rgba(200,80,30,0.2); }
         body.prestige-2 { background: radial-gradient(circle at 20% 80%, #1a3f2c, #0a1f12); box-shadow: inset 0 0 100px rgba(0,255,200,0.1); }
         body.prestige-3 { background: radial-gradient(circle at 50% 50%, #4a2c1a, #221105); box-shadow: inset 0 0 120px rgba(255,215,0,0.25); }
 
@@ -68,13 +68,8 @@
             border-left: 3px solid #ffaa33;
             font-family: monospace;
             z-index: 100;
-            box-shadow: 0 0 12px rgba(255,170,0,0.3);
         }
-        #streakPercent {
-            font-size: 1.2rem;
-            color: #ffcc55;
-            font-weight: bold;
-        }
+        #streakPercent { font-size: 1.2rem; color: #ffcc55; font-weight: bold; }
         #prestigeBadge {
             position: fixed;
             top: 85px;
@@ -132,7 +127,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 340px;
+            width: 350px;
             max-width: 88vw;
             background: #1e1712ea;
             backdrop-filter: blur(20px);
@@ -160,16 +155,16 @@
         .panel button:active { transform: scale(0.97); background: #5e3e2a; }
         .close-panel { background: #7a3a28 !important; margin-top: 8px; }
         hr { border-color: #ffb34760; margin: 8px 0; }
-        .prestige-tier {
+        .prestige-card {
             background: #2a1f1ad9;
             border-left: 5px solid #ffb347;
-            padding: 8px 10px;
+            padding: 12px 12px;
             border-radius: 28px;
-            margin: 6px 0;
+            margin: 8px 0;
         }
-        .hidden-prestige {
-            opacity: 0.5;
-            filter: grayscale(0.4);
+        .prestige-highlight {
+            color: #ffcc88;
+            font-weight: bold;
         }
         .float {
             position: fixed;
@@ -200,6 +195,11 @@
             50% { transform: scale(1.08); }
             100% { transform: scale(1); }
         }
+        .locked-notice {
+            font-size: 0.8rem;
+            color: #ffaa88;
+            text-align: center;
+        }
     </style>
 </head>
 <body class="prestige-0">
@@ -210,7 +210,7 @@
     🔥 STREAK: <span id="streakValue">0</span> / 100 &nbsp;| 
     ✨ BONUS: +<span id="streakPercent">0</span>%
 </div>
-<div id="prestigeBadge">🏆 PRESTIGE <span id="prestigeLevel">0</span> &nbsp;| 💪 BONUS <span id="prestigeBonus">+0%</span></div>
+<div id="prestigeBadge">🏆 PRESTIGE <span id="prestigeLevel">0</span> &nbsp;| 💪 BONUS +<span id="prestigeBonus">0</span>%</div>
 
 <div class="menu-bar">
     <button class="menu-btn" onclick="openPanel('shopPanel')">🏪 UPGRADES</button>
@@ -218,7 +218,7 @@
     <button class="menu-btn" onclick="openPanel('settingsPanel')">⚙️ SETTINGS</button>
 </div>
 
-<!-- UPGRADES PANEL -->
+<!-- UPGRADES PANEL - Shows new upgrades after prestige -->
 <div id="shopPanel" class="panel">
     <h3>🍫 CLICKER UPGRADES</h3>
     <button onclick="buyClickPower()">🔨 +1 Base Click (Cost: <span id="clickCost">10</span>)</button>
@@ -228,29 +228,25 @@
     <button onclick="buySiphon()">🥤 Auto Siphon +1/sec (Cost: <span id="autoCost">30</span>)</button>
     <button onclick="buyBottler()">🏭 Bottling Plant +8/sec (Cost: <span id="factoryCost">220</span>)</button>
     <button onclick="buyMegaTank()">🌀 Mega Tank +50/sec (Cost: <span id="megaCost">1200</span>)</button>
-    <hr>
-    <h3>🛡️ STREAK UPGRADE</h3>
-    <button onclick="buyStreakSaver()">💪 Streak Saver (500) - keep 40% streak after idle</button>
+    
+    <!-- PRESTIGE EXCLUSIVE UPGRADES (appear only after unlocking each tier) -->
+    <hr id="prestigeUpgradeDivider" style="display: none;">
+    <div id="prestigeUpgradesContainer">
+        <h3 id="prestigeUpgradeTitle" style="display: none;">✨ PRESTIGE LEGACY UPGRADES</h3>
+        <button id="prestigeUpgrade1" style="display: none; background: #5e3a2a;" onclick="buyPrestigeUpgrade(1)">🌟 Tier1 Relic: +15% Global (Cost: <span id="prestigeUpgrade1Cost">800</span>)</button>
+        <button id="prestigeUpgrade2" style="display: none; background: #6a4e3a;" onclick="buyPrestigeUpgrade(2)">💎 Tier2 Relic: +25% Global (Cost: <span id="prestigeUpgrade2Cost">5000</span>)</button>
+        <button id="prestigeUpgrade3" style="display: none; background: #8a6a3a;" onclick="buyPrestigeUpgrade(3)">👑 Tier3 Relic: +50% Global (Cost: <span id="prestigeUpgrade3Cost">25000</span>)</button>
+    </div>
     <button class="close-panel" onclick="closeAllPanels()">✖ CLOSE</button>
 </div>
 
-<!-- PRESTIGE PANEL (progressive unlock) -->
+<!-- PRESTIGE PANEL: Show only the next available prestige with clear description -->
 <div id="prestigePanel" class="panel">
-    <h3>🌟 PRESTIGE REALMS (Cola Evolution)</h3>
-    <div id="prestige1Div" class="prestige-tier">
-        <strong>🥤 1st Prestige - Cherry Cola</strong><br>
-        <span>Requires 10,000 total cola → +50% permanent bonus & 🍒 new look</span><br>
-        <button id="prestige1Btn" onclick="attemptPrestige(1)">✨ PRESTIGE I</button>
-    </div>
-    <div id="prestige2Div" class="prestige-tier hidden-prestige">
-        <strong>💎 2nd Prestige - Diamond Cola</strong><br>
-        <span>Requires 100,000 total & Prestige 1 → +120% bonus & 💎 theme</span><br>
-        <button id="prestige2Btn" onclick="attemptPrestige(2)" disabled>🔒 LOCKED</button>
-    </div>
-    <div id="prestige3Div" class="prestige-tier hidden-prestige">
-        <strong>👑 3rd Prestige - Golden Cola</strong><br>
-        <span>Requires 1,000,000 total & Prestige 2 → +250% bonus & 👑 royal cola</span><br>
-        <button id="prestige3Btn" onclick="attemptPrestige(3)" disabled>🔒 LOCKED</button>
+    <h3>🌟 PRESTIGE - UNLOCK NEW POWER</h3>
+    <div id="prestigeInfo" class="prestige-card">
+        <div id="prestigeDescription"></div>
+        <button id="prestigeActionBtn" onclick="performPrestige()" style="margin-top: 12px; background: #c97e3a;">✨ PRESTIGE NOW</button>
+        <div id="prestigeWarning" class="locked-notice" style="margin-top: 8px;"></div>
     </div>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
@@ -263,7 +259,7 @@
     <p>🔊 Master Volume</p>
     <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.3">
     <hr>
-    <p><em>Streak = +1% per click, max 100% at 100 streak!</em></p>
+    <p><em>Streak = +1% per click, max 100% at 100 clicks!</em></p>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
@@ -275,20 +271,23 @@
     // ------------------- GAME STATE -------------------
     let cola = 0;
     let totalAllTime = 0;
-    let baseClickPower = 1;          // base from upgrades
-    let quantumActive = false;        // +50 click power upgrade
+    let baseClickPower = 1;
+    let quantumActive = false;
     let autoSiphonCount = 0;
     let bottlerCount = 0;
     let megaTankCount = 0;
     
-    // Prestige system
-    let prestigeTier = 0;      // 0,1,2,3
-    let permanentBonus = 1.0;  // global multiplier
+    // Prestige system: tier 0,1,2,3
+    let prestigeTier = 0;
+    let globalBonusPercent = 0;     // cumulative % from prestige (30% per tier)
     
-    // STREAK SYSTEM: each click = +1% bonus, max 100% (which means x2 multiplier)
-    // Every click adds 1% to cola gain, up to 100% max (double damage)
+    // Prestige-exclusive upgrades (each unlockable only after reaching that prestige tier)
+    let prestigeUpgradeBought = [false, false, false]; // index 1,2,3
+    let prestigeUpgradeCost = [0, 800, 5000, 25000];
+    
+    // Streak system
     let currentStreak = 0;
-    let streakBonusPercent = 0;   // 0 to 100
+    let streakBonusPercent = 0;
     let streakSaverOwned = false;
     
     // Upgrade costs
@@ -321,105 +320,117 @@
     }
     music.play().catch(()=>console.log("click to enable music"));
     
-    // Helper: Get final click power
-    // Formula: (baseClickPower + quantumBonus) * (1 + streakBonusPercent/100) * permanentBonus
+    // Helper: total global multiplier = 1 + (globalBonusPercent/100) + prestigeUpgrade bonuses
+    function getTotalGlobalMultiplier() {
+        let bonus = globalBonusPercent;
+        if(prestigeUpgradeBought[1]) bonus += 15;
+        if(prestigeUpgradeBought[2]) bonus += 25;
+        if(prestigeUpgradeBought[3]) bonus += 50;
+        return 1 + (bonus / 100);
+    }
+    
     function getFinalClickPower() {
         let base = baseClickPower;
         if(quantumActive) base += 50;
-        let streakMultiplier = 1 + (streakBonusPercent / 100);
-        let final = Math.floor(base * streakMultiplier * permanentBonus);
-        return final < 1 ? 1 : final;
+        let streakMulti = 1 + (streakBonusPercent / 100);
+        let total = Math.floor(base * streakMulti * getTotalGlobalMultiplier());
+        return total < 1 ? 1 : total;
     }
     
     function getAutoIncome() {
         let auto = autoSiphonCount + (bottlerCount * 8) + (megaTankCount * 50);
-        auto = Math.floor(auto * permanentBonus);
+        auto = Math.floor(auto * getTotalGlobalMultiplier());
         return auto;
     }
     
-    // Streak logic: every click increases streak by 1, each point gives +1% bonus (max 100% at 100 streak)
+    // Streak logic: each click = +1% up to 100%
     function updateStreakOnClick() {
         if(currentStreak < 100) {
             currentStreak++;
-            streakBonusPercent = currentStreak;  // 1% per click, max 100%
+            streakBonusPercent = currentStreak;
             if(streakBonusPercent > 100) streakBonusPercent = 100;
         } else {
             streakBonusPercent = 100;
         }
-        // Visual flash on streak box
         let sb = document.getElementById("streakBox");
         sb.classList.add("streak-flash");
         setTimeout(()=> sb.classList.remove("streak-flash"), 200);
     }
     
-    // IDLE STREAK RESET (after 5 seconds without clicking)
     let idleTimeout;
     function resetStreakFromIdle() {
         if(currentStreak > 0) {
             if(streakSaverOwned) {
                 let preserved = Math.floor(currentStreak * 0.4);
-                if(preserved < 0) preserved = 0;
                 currentStreak = preserved;
                 streakBonusPercent = currentStreak;
-                showFloatingText(`🛡️ Streak Saver! Streak → ${currentStreak}% bonus`, window.innerWidth/2, 80);
+                showFloatingText(`🛡️ Streak Saver! Streak → ${currentStreak}%`, window.innerWidth/2, 80);
             } else {
                 currentStreak = 0;
                 streakBonusPercent = 0;
-                showFloatingText(`💔 Streak broken! Bonus reset to 0%`, window.innerWidth/2, 80);
+                showFloatingText(`💔 Streak broken!`, window.innerWidth/2, 80);
             }
             updateUI();
         }
     }
-    
     function resetIdleTimer() {
         if(idleTimeout) clearTimeout(idleTimeout);
         idleTimeout = setTimeout(() => resetStreakFromIdle(), 5200);
     }
     
-    // UI Updater with progressive prestige visibility
+    // UI update with prestige visibility rules
     function updateUI() {
         document.getElementById("colaCount").innerText = Math.floor(cola);
         document.getElementById("allTime").innerText = Math.floor(totalAllTime);
         document.getElementById("streakValue").innerText = currentStreak;
         document.getElementById("streakPercent").innerText = streakBonusPercent;
         document.getElementById("prestigeLevel").innerText = prestigeTier;
-        let bonusPercent = Math.round((permanentBonus - 1) * 100);
-        document.getElementById("prestigeBonus").innerText = `+${bonusPercent}%`;
+        document.getElementById("prestigeBonus").innerText = globalBonusPercent;
         
-        // Upgrade costs display
         document.getElementById("clickCost").innerText = clickCost;
         document.getElementById("quantumCost").innerText = quantumCost;
         document.getElementById("autoCost").innerText = siphonCost;
         document.getElementById("factoryCost").innerText = bottlerCost;
         document.getElementById("megaCost").innerText = megaCost;
         
-        // Prestige progressive visibility (show 2nd after 1st, 3rd after 2nd)
-        let p1Div = document.getElementById("prestige1Div");
-        let p2Div = document.getElementById("prestige2Div");
-        let p3Div = document.getElementById("prestige3Div");
-        let p1Btn = document.getElementById("prestige1Btn");
-        let p2Btn = document.getElementById("prestige2Btn");
-        let p3Btn = document.getElementById("prestige3Btn");
-        
-        if(p1Btn) p1Btn.disabled = !(prestigeTier === 0 && totalAllTime >= 10000);
+        // Show prestige upgrades based on tier reached
+        let divider = document.getElementById("prestigeUpgradeDivider");
+        let title = document.getElementById("prestigeUpgradeTitle");
+        let btn1 = document.getElementById("prestigeUpgrade1");
+        let btn2 = document.getElementById("prestigeUpgrade2");
+        let btn3 = document.getElementById("prestigeUpgrade3");
         
         if(prestigeTier >= 1) {
-            p2Div.classList.remove("hidden-prestige");
-            if(p2Btn) p2Btn.disabled = !(prestigeTier === 1 && totalAllTime >= 100000);
+            divider.style.display = "block";
+            title.style.display = "block";
+            btn1.style.display = "block";
+            if(prestigeUpgradeBought[1]) btn1.disabled = true;
+            else btn1.disabled = false;
+            document.getElementById("prestigeUpgrade1Cost").innerText = prestigeUpgradeCost[1];
         } else {
-            p2Div.classList.add("hidden-prestige");
-            if(p2Btn) p2Btn.disabled = true;
+            btn1.style.display = "none";
         }
-        
         if(prestigeTier >= 2) {
-            p3Div.classList.remove("hidden-prestige");
-            if(p3Btn) p3Btn.disabled = !(prestigeTier === 2 && totalAllTime >= 1000000);
+            btn2.style.display = "block";
+            if(prestigeUpgradeBought[2]) btn2.disabled = true;
+            else btn2.disabled = false;
+            document.getElementById("prestigeUpgrade2Cost").innerText = prestigeUpgradeCost[2];
         } else {
-            p3Div.classList.add("hidden-prestige");
-            if(p3Btn) p3Btn.disabled = true;
+            btn2.style.display = "none";
+        }
+        if(prestigeTier >= 3) {
+            btn3.style.display = "block";
+            if(prestigeUpgradeBought[3]) btn3.disabled = true;
+            else btn3.disabled = false;
+            document.getElementById("prestigeUpgrade3Cost").innerText = prestigeUpgradeCost[3];
+        } else {
+            btn3.style.display = "none";
         }
         
-        // Dynamic background
+        // Prestige panel dynamic description (only show current available prestige)
+        updatePrestigePanelDescription();
+        
+        // Background theme based on tier
         let bodyClass = document.body;
         bodyClass.classList.remove("prestige-0", "prestige-1", "prestige-2", "prestige-3");
         if(prestigeTier === 0) bodyClass.classList.add("prestige-0");
@@ -427,7 +438,7 @@
         else if(prestigeTier === 2) bodyClass.classList.add("prestige-2");
         else if(prestigeTier === 3) bodyClass.classList.add("prestige-3");
         
-        // Cola emoji by prestige
+        // Cola emoji evolution
         let colaEmoji = document.getElementById("cola");
         if(prestigeTier === 0) colaEmoji.innerText = "🥤";
         else if(prestigeTier === 1) colaEmoji.innerText = "🍒";
@@ -435,130 +446,85 @@
         else if(prestigeTier === 3) colaEmoji.innerText = "👑";
     }
     
-    function showFloatingText(msg, x, y) {
-        let f = document.createElement("div");
-        f.className = "float";
-        f.innerText = msg;
-        let posX = x || (window.innerWidth/2 + (Math.random() * 100 - 50));
-        let posY = y || (window.innerHeight/2 - 60 + (Math.random() * 90));
-        f.style.left = posX + "px";
-        f.style.top = posY + "px";
-        document.body.appendChild(f);
-        setTimeout(()=>f.remove(), 1000);
-    }
-    
-    // MAIN CLICK ACTION
-    function onColaClick(e) {
-        let gain = getFinalClickPower();
-        cola += gain;
-        totalAllTime += gain;
-        updateStreakOnClick();
-        resetIdleTimer();
-        playClickSound();
+    // Show only the next prestige (you see Prestige 1 until you do it, then Prestige 2 appears, etc.)
+    function updatePrestigePanelDescription() {
+        let descDiv = document.getElementById("prestigeDescription");
+        let actionBtn = document.getElementById("prestigeActionBtn");
+        let warningDiv = document.getElementById("prestigeWarning");
         
-        // Visual feedback
-        let colaDiv = document.getElementById("cola");
-        colaDiv.classList.add("click-effect");
-        setTimeout(()=> colaDiv.classList.remove("click-effect"), 100);
-        
-        let rect = colaDiv.getBoundingClientRect();
-        let cx = rect.left + rect.width/2;
-        let cy = rect.top + rect.height/2;
-        showFloatingText(`+${gain} (${streakBonusPercent}% streak)`, cx, cy-25);
-        updateUI();
-    }
-    
-    // AUTO INCOME LOOP
-    setInterval(() => {
-        let income = getAutoIncome();
-        if(income > 0) {
-            cola += income;
-            totalAllTime += income;
-            updateUI();
+        if(prestigeTier === 0) {
+            descDiv.innerHTML = `<span class="prestige-highlight">🥤 PRESTIGE 1 (Cherry Cola)</span><br>
+            ➤ You will get <strong>+30% permanent cola bonus</strong> forever!<br>
+            ➤ Unlock <strong>3 new powerful upgrades</strong> in the shop!<br>
+            ➤ Cola evolves into 🍒<br>
+            ➤ Requirement: 10,000 total cola<br>
+            <span style="color:#ffaa66;">⚠️ You will lose ALL upgrades and cola, but keep total cola count!</span>`;
+            if(totalAllTime >= 10000) {
+                actionBtn.disabled = false;
+                warningDiv.innerText = "✅ Ready to Prestige! You'll gain +30% permanent bonus.";
+            } else {
+                actionBtn.disabled = true;
+                warningDiv.innerText = `🔒 Need ${10000 - totalAllTime} more total cola to unlock Prestige 1.`;
+            }
+        } 
+        else if(prestigeTier === 1) {
+            descDiv.innerHTML = `<span class="prestige-highlight">💎 PRESTIGE 2 (Diamond Cola)</span><br>
+            ➤ You will get <strong>+30% permanent cola bonus</strong> (stacking, total +60%)!<br>
+            ➤ Unlock <strong>3 more new upgrades</strong> (Tier 2 relics)!<br>
+            ➤ Cola evolves into 💎<br>
+            ➤ Requirement: 100,000 total cola<br>
+            <span style="color:#ffaa66;">⚠️ You will lose ALL upgrades and cola again, but keep total cola count!</span>`;
+            if(totalAllTime >= 100000) {
+                actionBtn.disabled = false;
+                warningDiv.innerText = "✅ Ready for Prestige 2! +30% more bonus (total +60%)";
+            } else {
+                actionBtn.disabled = true;
+                warningDiv.innerText = `🔒 Need ${100000 - totalAllTime} more total cola for Prestige 2.`;
+            }
         }
-    }, 1000);
-    
-    // UPGRADES
-    function buyClickPower() {
-        if(cola >= clickCost) {
-            cola -= clickCost;
-            baseClickPower++;
-            clickUpgradeLevel++;
-            clickCost = Math.floor(10 + baseClickPower * 5);
-            playUpgradeSound();
-            updateUI();
-        } else showFloatingText("❌ Not enough cola!",0,0);
-    }
-    
-    function buyQuantum() {
-        if(!quantumActive && cola >= quantumCost) {
-            cola -= quantumCost;
-            quantumActive = true;
-            playUpgradeSound();
-            updateUI();
-        } else if(quantumActive) showFloatingText("⚛️ Quantum Core already owned!",0,0);
-        else showFloatingText("❌ Need " + quantumCost + " cola",0,0);
-    }
-    
-    function buySiphon() {
-        if(cola >= siphonCost) {
-            cola -= siphonCost;
-            autoSiphonCount++;
-            siphonCost = Math.floor(30 + autoSiphonCount * 10);
-            playUpgradeSound();
-            updateUI();
-        } else showFloatingText("❌ Need cola",0,0);
-    }
-    
-    function buyBottler() {
-        if(cola >= bottlerCost) {
-            cola -= bottlerCost;
-            bottlerCount++;
-            bottlerCost = Math.floor(220 + bottlerCount * 32);
-            playUpgradeSound();
-            updateUI();
-        } else showFloatingText("❌ Need cola",0,0);
-    }
-    
-    function buyMegaTank() {
-        if(cola >= megaCost) {
-            cola -= megaCost;
-            megaTankCount++;
-            megaCost = Math.floor(1200 + megaTankCount * 160);
-            playUpgradeSound();
-            updateUI();
-        } else showFloatingText("❌ Need cola",0,0);
-    }
-    
-    function buyStreakSaver() {
-        if(!streakSaverOwned && cola >= 500) {
-            cola -= 500;
-            streakSaverOwned = true;
-            playUpgradeSound();
-            showFloatingText("🛡️ Streak Saver ACTIVE! Keep 40% streak after idle",0,0);
-            updateUI();
-        } else if(streakSaverOwned) showFloatingText("Already have Streak Saver!",0,0);
-        else showFloatingText("Need 500 cola",0,0);
-    }
-    
-    // PRESTIGE (3 tiers with progressive reveal)
-    function attemptPrestige(tier) {
-        if(tier === 1 && prestigeTier === 0 && totalAllTime >= 10000) {
-            confirmPrestige(1, 0.5);
-        } else if(tier === 2 && prestigeTier === 1 && totalAllTime >= 100000) {
-            confirmPrestige(2, 1.2);
-        } else if(tier === 3 && prestigeTier === 2 && totalAllTime >= 1000000) {
-            confirmPrestige(3, 2.5);
-        } else {
-            showFloatingText(`🚫 Cannot reach Prestige ${tier} yet!`, window.innerWidth/2, 150);
+        else if(prestigeTier === 2) {
+            descDiv.innerHTML = `<span class="prestige-highlight">👑 PRESTIGE 3 (Golden Cola)</span><br>
+            ➤ You will get <strong>+30% permanent cola bonus</strong> (total +90%)!<br>
+            ➤ Unlock <strong>3 final ultimate upgrades</strong> (Tier 3 relics)!<br>
+            ➤ Cola evolves into 👑<br>
+            ➤ Requirement: 1,000,000 total cola<br>
+            <span style="color:#ffaa66;">⚠️ Final Prestige! Massive power!</span>`;
+            if(totalAllTime >= 1000000) {
+                actionBtn.disabled = false;
+                warningDiv.innerText = "✅ ULTIMATE PRESTIGE READY! +30% final bonus.";
+            } else {
+                actionBtn.disabled = true;
+                warningDiv.innerText = `🔒 Need ${1000000 - totalAllTime} more total cola for Prestige 3.`;
+            }
+        }
+        else {
+            descDiv.innerHTML = `<span class="prestige-highlight">🌟 MAX PRESTIGE ACHIEVED!</span><br>
+            You have reached the highest Prestige tier!<br>
+            Keep stacking upgrades and enjoy your +90% permanent bonus!<br>
+            👑 Golden Cola Master!`;
+            actionBtn.disabled = true;
+            actionBtn.innerText = "✨ MAXED";
+            warningDiv.innerText = "You are a Cola Legend!";
         }
     }
     
-    function confirmPrestige(newTier, bonusMulti) {
-        let msg = `✨ PRESTIGE TO TIER ${newTier}!\nYou will reset cola, upgrades, but keep permanent +${Math.round(bonusMulti*100)}% bonus.\nCola transforms! Continue?`;
-        if(!confirm(msg)) return;
+    // Perform Prestige (only current tier)
+    function performPrestige() {
+        let canPrestige = false;
+        let newTier = 0;
+        if(prestigeTier === 0 && totalAllTime >= 10000) { canPrestige = true; newTier = 1; }
+        else if(prestigeTier === 1 && totalAllTime >= 100000) { canPrestige = true; newTier = 2; }
+        else if(prestigeTier === 2 && totalAllTime >= 1000000) { canPrestige = true; newTier = 3; }
         
-        // Reset all non-prestige progress
+        if(!canPrestige) {
+            showFloatingText("❌ Prestige requirements not met!", window.innerWidth/2, 120);
+            return;
+        }
+        
+        let confirmMsg = `✨ PRESTIGE TO TIER ${newTier}?\n\nYou will gain +30% permanent bonus (total +${(globalBonusPercent+30)}%).\nYou will lose all cola, click upgrades, auto producers, and streak upgrades.\nBut you will unlock new powerful legacy upgrades!\n\nProceed?`;
+        if(!confirm(confirmMsg)) return;
+        
+        // Reset all progress
         cola = 0;
         baseClickPower = 1;
         clickUpgradeLevel = 0;
@@ -575,17 +541,129 @@
         currentStreak = 0;
         streakBonusPercent = 0;
         
+        // Increase global bonus by 30%
+        globalBonusPercent += 30;
         prestigeTier = newTier;
-        permanentBonus = 1 + bonusMulti;  // 1.5x, 2.2x, 3.5x
         
         playUpgradeSound();
         updateUI();
         closeAllPanels();
-        showFloatingText(`🌟 PRESTIGE ${newTier} ACHIEVED! +${Math.round(bonusMulti*100)}% GLOBAL BONUS`, window.innerWidth/2, 120);
+        showFloatingText(`🌟 PRESTIGE ${newTier} ACHIEVED! +30% PERMANENT BONUS!`, window.innerWidth/2, 100);
         resetIdleTimer();
     }
     
-    // PANEL CONTROLS
+    // Buy prestige-exclusive upgrades (appear only after unlocking tier)
+    function buyPrestigeUpgrade(tier) {
+        if(prestigeUpgradeBought[tier]) {
+            showFloatingText("Already bought this relic!",0,0);
+            return;
+        }
+        let cost = prestigeUpgradeCost[tier];
+        if(cola >= cost) {
+            cola -= cost;
+            prestigeUpgradeBought[tier] = true;
+            playUpgradeSound();
+            showFloatingText(`✨ ${tier==1?"Tier1":tier==2?"Tier2":"Tier3"} Relic acquired! +${tier==1?15:tier==2?25:50}% global bonus!`,0,0);
+            updateUI();
+        } else {
+            showFloatingText(`❌ Need ${cost} cola for this relic!`,0,0);
+        }
+    }
+    
+    // Standard upgrades
+    function buyClickPower() {
+        if(cola >= clickCost) {
+            cola -= clickCost;
+            baseClickPower++;
+            clickUpgradeLevel++;
+            clickCost = Math.floor(10 + baseClickPower * 5);
+            playUpgradeSound();
+            updateUI();
+        } else showFloatingText("❌ Not enough cola!",0,0);
+    }
+    function buyQuantum() {
+        if(!quantumActive && cola >= quantumCost) {
+            cola -= quantumCost;
+            quantumActive = true;
+            playUpgradeSound();
+            updateUI();
+        } else if(quantumActive) showFloatingText("⚛️ Already owned!",0,0);
+        else showFloatingText("❌ Need cola",0,0);
+    }
+    function buySiphon() {
+        if(cola >= siphonCost) {
+            cola -= siphonCost;
+            autoSiphonCount++;
+            siphonCost = Math.floor(30 + autoSiphonCount * 10);
+            playUpgradeSound();
+            updateUI();
+        } else showFloatingText("❌ Need cola",0,0);
+    }
+    function buyBottler() {
+        if(cola >= bottlerCost) {
+            cola -= bottlerCost;
+            bottlerCount++;
+            bottlerCost = Math.floor(220 + bottlerCount * 32);
+            playUpgradeSound();
+            updateUI();
+        } else showFloatingText("❌ Need cola",0,0);
+    }
+    function buyMegaTank() {
+        if(cola >= megaCost) {
+            cola -= megaCost;
+            megaTankCount++;
+            megaCost = Math.floor(1200 + megaTankCount * 160);
+            playUpgradeSound();
+            updateUI();
+        } else showFloatingText("❌ Need cola",0,0);
+    }
+    function buyStreakSaver() {
+        if(!streakSaverOwned && cola >= 500) {
+            cola -= 500;
+            streakSaverOwned = true;
+            playUpgradeSound();
+            showFloatingText("🛡️ Streak Saver ACTIVE!",0,0);
+            updateUI();
+        } else if(streakSaverOwned) showFloatingText("Already owned!",0,0);
+        else showFloatingText("Need 500 cola",0,0);
+    }
+    
+    function showFloatingText(msg, x, y) {
+        let f = document.createElement("div");
+        f.className = "float";
+        f.innerText = msg;
+        let posX = x || (window.innerWidth/2 + (Math.random() * 100 - 50));
+        let posY = y || (window.innerHeight/2 - 60 + (Math.random() * 90));
+        f.style.left = posX + "px";
+        f.style.top = posY + "px";
+        document.body.appendChild(f);
+        setTimeout(()=>f.remove(), 1000);
+    }
+    
+    function onColaClick(e) {
+        let gain = getFinalClickPower();
+        cola += gain;
+        totalAllTime += gain;
+        updateStreakOnClick();
+        resetIdleTimer();
+        playClickSound();
+        let colaDiv = document.getElementById("cola");
+        colaDiv.classList.add("click-effect");
+        setTimeout(()=> colaDiv.classList.remove("click-effect"), 100);
+        let rect = colaDiv.getBoundingClientRect();
+        showFloatingText(`+${gain} (${streakBonusPercent}% streak)`, rect.left+rect.width/2, rect.top+rect.height/2-25);
+        updateUI();
+    }
+    
+    setInterval(() => {
+        let income = getAutoIncome();
+        if(income > 0) {
+            cola += income;
+            totalAllTime += income;
+            updateUI();
+        }
+    }, 1000);
+    
     function openPanel(id) {
         closeAllPanels();
         let panel = document.getElementById(id);
@@ -594,8 +672,6 @@
     function closeAllPanels() {
         document.querySelectorAll('.panel').forEach(p => p.style.display = "none");
     }
-    
-    // AUDIO
     function toggleMusic() {
         musicOn = !musicOn;
         if(musicOn) music.play().catch(e=>{});
@@ -607,17 +683,12 @@
         music.volume = volume;
     }
     
-    // EVENT LISTENERS
-    document.getElementById("cola").addEventListener("click", (e) => {
-        onColaClick(e);
-        e.stopPropagation();
-    });
+    document.getElementById("cola").addEventListener("click", onColaClick);
     document.getElementById("volumeSlider").addEventListener("input", (e) => setVolume(parseFloat(e.target.value)));
     document.body.addEventListener("click", (e) => {
         if(!e.target.closest('#cola')) resetIdleTimer();
     });
     
-    // Initialization
     resetIdleTimer();
     updateUI();
 </script>
