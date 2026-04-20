@@ -3,68 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥤 REBIRTH COLA | Ascend & Evolve</title>
+    <title>🥤 COLA LEGENDS | Streak + Leaderboard</title>
     <style>
         * {
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+            box-sizing: border-box;
         }
 
         body {
             margin: 0;
-            font-family: 'Segoe UI', 'Poppins', Arial, sans-serif;
-            background: radial-gradient(circle at 30% 20%, #0a0f1f, #020408);
+            font-family: 'Segoe UI', 'Poppins', 'Inter', Arial, sans-serif;
+            background: radial-gradient(circle at 30% 20%, #0f1722, #03050b);
             color: white;
             overflow-x: hidden;
             min-height: 100vh;
-            transition: background 0.4s ease;
         }
 
-        /* Clean dark theme - background stays dark, cola changes */
-        body {
-            background: radial-gradient(circle at 30% 20%, #0f1722, #03050b);
-        }
-
-        /* HUD */
-        #hud {
+        /* HUD elements */
+        .hud-container {
             position: fixed;
             top: 15px;
-            left: 20px;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
-            border-radius: 60px;
-            font-weight: bold;
-            font-size: 1.3rem;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            pointer-events: none;
             z-index: 100;
-            border-left: 4px solid #ff7e3a;
-            font-family: monospace;
         }
-        #totalDisplay {
-            position: fixed;
-            top: 15px;
-            right: 20px;
+        .hud-card {
             background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(10px);
-            padding: 8px 20px;
+            backdrop-filter: blur(12px);
+            padding: 8px 22px;
             border-radius: 60px;
             font-weight: bold;
             font-size: 1.2rem;
+            font-family: monospace;
+            pointer-events: auto;
+            border: 1px solid rgba(255,180,70,0.4);
+        }
+        .hud-card span { color: #ffcc66; }
+        #streakBox {
+            position: fixed;
+            top: 85px;
+            left: 20px;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1rem;
+            border-left: 4px solid #ffaa44;
+            font-family: monospace;
             z-index: 100;
-            border-right: 4px solid #ffaa44;
+            box-shadow: 0 0 15px rgba(255,170,0,0.3);
+            transition: all 0.1s ease;
+        }
+        .streak-multiplier {
+            font-size: 1.4rem;
+            color: #ffdd88;
+            text-shadow: 0 0 5px #ffaa33;
         }
         #prestigeBadge {
             position: fixed;
             top: 85px;
             right: 20px;
-            background: rgba(0,0,0,0.75);
-            backdrop-filter: blur(8px);
-            padding: 6px 18px;
-            border-radius: 40px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            padding: 8px 22px;
+            border-radius: 60px;
             font-weight: bold;
             font-size: 0.9rem;
-            color: #e6c8ff;
             border-right: 3px solid #c084fc;
+            font-family: monospace;
             z-index: 100;
         }
         .menu-bar {
@@ -74,17 +86,17 @@
             right: 0;
             display: flex;
             justify-content: center;
-            gap: 18px;
+            gap: 16px;
             z-index: 200;
         }
         .menu-btn {
             background: #1e293bdd;
             backdrop-filter: blur(8px);
             border: 1px solid #ffaa6644;
-            padding: 10px 26px;
+            padding: 10px 24px;
             border-radius: 60px;
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.95rem;
             color: #f5e2c1;
             cursor: pointer;
             transition: 0.1s;
@@ -98,38 +110,38 @@
             height: 100vh;
             flex-direction: column;
         }
-        /* NEW COLA ICON - modern sleek bottle */
         #cola {
             font-size: 200px;
             cursor: pointer;
             filter: drop-shadow(0 0 25px rgba(255,100,30,0.6));
             transition: transform 0.07s cubic-bezier(0.2, 1.2, 0.8, 1);
-            background: none;
             display: inline-block;
         }
         #cola:active { transform: scale(0.92); }
         
-        /* Panel styles */
+        /* Panels */
         .panel {
             position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 350px;
-            max-width: 88vw;
-            background: #0f1722ea;
-            backdrop-filter: blur(20px);
+            width: 360px;
+            max-width: 90vw;
+            background: #0f1722f2;
+            backdrop-filter: blur(24px);
             border-radius: 38px;
             padding: 20px 18px;
             border: 1px solid #ffaa6680;
-            box-shadow: 0 25px 40px black;
+            box-shadow: 0 25px 45px black;
             z-index: 300;
             display: none;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             color: #fff0e0;
+            max-height: 85vh;
+            overflow-y: auto;
         }
-        .panel h3 { margin: 0 0 8px; text-align: center; color: #ffcf9a; }
+        .panel h3 { margin: 0 0 6px; text-align: center; color: #ffcf9a; }
         .panel button {
             background: #3e2a1f;
             border: none;
@@ -138,28 +150,51 @@
             font-weight: bold;
             color: white;
             cursor: pointer;
-            transition: 0.07s linear;
+            transition: 0.07s;
         }
         .panel button:active { transform: scale(0.97); background: #5e3e2a; }
-        .panel button:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
         .close-panel { background: #7a3a28 !important; margin-top: 8px; }
         hr { border-color: #ffb34760; margin: 8px 0; }
         .prestige-card {
             background: #1e293b;
             border-left: 5px solid #ffb347;
-            padding: 12px 12px;
+            padding: 12px;
             border-radius: 28px;
             margin: 8px 0;
         }
-        .prestige-highlight { color: #ffcc88; font-weight: bold; }
+        .leaderboard-entry {
+            background: #00000055;
+            margin: 6px 0;
+            padding: 8px 12px;
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-between;
+            font-family: monospace;
+            font-weight: bold;
+            border-bottom: 1px solid #ffaa6644;
+        }
+        .leaderboard-rank {
+            color: #ffcc88;
+            width: 40px;
+        }
+        .leaderboard-name {
+            flex: 1;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .leaderboard-cola {
+            color: #88ffaa;
+        }
         .float {
             position: fixed;
             font-weight: bold;
-            color: #fff0aa;
+            color: #ffdd99;
             text-shadow: 0 0 8px #ff8800;
             animation: floatPop 1s forwards;
             pointer-events: none;
-            font-size: 1.6rem;
+            font-size: 1.5rem;
             z-index: 1000;
         }
         @keyframes floatPop {
@@ -171,8 +206,15 @@
         }
         @keyframes colaPop {
             0% { transform: scale(1); filter: drop-shadow(0 0 20px rgba(255,100,30,0.8));}
-            50% { transform: scale(1.1); filter: drop-shadow(0 0 40px #ffaa44);}
+            50% { transform: scale(1.1); filter: drop-shadow(0 0 45px #ffaa44);}
             100% { transform: scale(1); }
+        }
+        .streak-pulse {
+            animation: streakGlow 0.2s ease-out;
+        }
+        @keyframes streakGlow {
+            0% { box-shadow: 0 0 0px gold; background: rgba(255,200,0,0);}
+            100% { box-shadow: 0 0 22px #ffcc44; background: rgba(255,200,0,0.2);}
         }
         .warning-popup {
             position: fixed;
@@ -194,28 +236,41 @@
             70% { opacity: 1; }
             100% { opacity: 0; bottom: 80px; visibility: hidden; }
         }
-        .locked-notice { font-size: 0.8rem; color: #ffaa88; text-align: center; }
-        
-        /* rebirth animation */
+        .rebirth-flash {
+            animation: rebirthGlow 0.8s ease-out;
+        }
         @keyframes rebirthGlow {
             0% { filter: drop-shadow(0 0 0px gold); transform: scale(1);}
             50% { filter: drop-shadow(0 0 50px #ffcc44); transform: scale(1.2);}
             100% { filter: drop-shadow(0 0 20px rgba(255,100,30,0.6)); transform: scale(1);}
         }
-        .rebirth-flash {
-            animation: rebirthGlow 0.8s ease-out;
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            background: #ffaa4422;
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-weight: bold;
+            margin-bottom: 8px;
         }
     </style>
 </head>
 <body>
 
-<div id="hud">🥤 COLA: <span id="colaCount">0</span></div>
-<div id="totalDisplay">📈 TOTAL: <span id="allTime">0</span></div>
+<div class="hud-container">
+    <div class="hud-card">🥤 COLA: <span id="colaCount">0</span></div>
+    <div class="hud-card">📈 TOTAL: <span id="allTime">0</span></div>
+</div>
+<div id="streakBox">
+    🔥 COMBO STREAK: <span id="streakValue">0</span> &nbsp;| &nbsp;
+    <span class="streak-multiplier">✧ <span id="streakMultiplier">1.00</span>x ✧</span>
+</div>
 <div id="prestigeBadge">🌀 REBIRTH <span id="prestigeLevel">0</span> &nbsp;| 💪 BONUS +<span id="prestigeBonus">0</span>%</div>
 
 <div class="menu-bar">
     <button class="menu-btn" onclick="openPanel('shopPanel')">🏪 UPGRADES</button>
     <button class="menu-btn" onclick="openPanel('rebirthPanel')">🌀 REBIRTH</button>
+    <button class="menu-btn" onclick="openPanel('leaderboardPanel')">🏆 LEADERBOARD</button>
     <button class="menu-btn" onclick="openPanel('settingsPanel')">⚙️ SETTINGS</button>
 </div>
 
@@ -229,25 +284,34 @@
     <button onclick="buySiphon()">🥤 Auto Siphon +1/sec (Cost: <span id="autoCost">30</span>)</button>
     <button onclick="buyBottler()">🏭 Bottling Plant +8/sec (Cost: <span id="factoryCost">220</span>)</button>
     <button onclick="buyMegaTank()">🌀 Mega Tank +50/sec (Cost: <span id="megaCost">1200</span>)</button>
-    
     <hr id="rebirthUpgradeDivider" style="display: none;">
     <div id="rebirthUpgradesContainer">
-        <h3 id="rebirthUpgradeTitle" style="display: none;">✨ ASCENDED LEGACY UPGRADES</h3>
-        <button id="rebirthUpgrade1" style="display: none; background: #5e3a6a;" onclick="buyRebirthUpgrade(1)">🌌 Cosmic Relic: +15% Global (Cost: <span id="rebirthUpgrade1Cost">800</span>)</button>
-        <button id="rebirthUpgrade2" style="display: none; background: #2a5f6a;" onclick="buyRebirthUpgrade(2)">💫 Void Essence: +25% Global (Cost: <span id="rebirthUpgrade2Cost">5000</span>)</button>
-        <button id="rebirthUpgrade3" style="display: none; background: #8a6a2a;" onclick="buyRebirthUpgrade(3)">👑 Eternal Crown: +50% Global (Cost: <span id="rebirthUpgrade3Cost">25000</span>)</button>
+        <h3 id="rebirthUpgradeTitle" style="display: none;">✨ ASCENDED RELICS</h3>
+        <button id="rebirthUpgrade1" style="display: none; background: #5e3a6a;" onclick="buyRebirthUpgrade(1)">🌌 Cosmic Relic: +15% (Cost: <span id="rebirthUpgrade1Cost">800</span>)</button>
+        <button id="rebirthUpgrade2" style="display: none; background: #2a5f6a;" onclick="buyRebirthUpgrade(2)">💫 Void Essence: +25% (Cost: <span id="rebirthUpgrade2Cost">5000</span>)</button>
+        <button id="rebirthUpgrade3" style="display: none; background: #8a6a2a;" onclick="buyRebirthUpgrade(3)">👑 Eternal Crown: +50% (Cost: <span id="rebirthUpgrade3Cost">25000</span>)</button>
     </div>
     <button class="close-panel" onclick="closeAllPanels()">✖ CLOSE</button>
 </div>
 
-<!-- REBIRTH PANEL - Only shows current available rebirth -->
+<!-- REBIRTH PANEL -->
 <div id="rebirthPanel" class="panel">
-    <h3>🌀 REBIRTH - EVOLVE YOUR COLA</h3>
+    <h3>🌀 REBIRTH - EVOLVE</h3>
     <div id="rebirthInfo" class="prestige-card">
         <div id="rebirthDescription"></div>
-        <button id="rebirthActionBtn" onclick="performRebirth()" style="margin-top: 12px; background: #c97e3a;">🌀 ASCEND & REBIRTH</button>
+        <button id="rebirthActionBtn" onclick="performRebirth()" style="margin-top: 12px;">🌀 ASCEND</button>
         <div id="rebirthWarning" class="locked-notice" style="margin-top: 8px;"></div>
     </div>
+    <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
+</div>
+
+<!-- LEADERBOARD PANEL (Top 25) -->
+<div id="leaderboardPanel" class="panel">
+    <h3>🏆 GLOBAL COLA LEGENDS (TOP 25)</h3>
+    <div class="leaderboard-header">
+        <span>#</span><span>CHAMPION</span><span>🥤 ALL-TIME</span>
+    </div>
+    <div id="leaderboardList" style="max-height: 55vh; overflow-y: auto;">Loading...</div>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
@@ -256,10 +320,10 @@
     <h3>🎧 AUDIO</h3>
     <button onclick="toggleMusic()">🎵 Toggle Music</button>
     <button onclick="toggleSFX()">🔊 Toggle SFX</button>
-    <p>🔊 Master Volume</p>
+    <p>🔊 Volume</p>
     <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.3">
     <hr>
-    <p><em>🌀 Rebirth changes your COLA ICON permanently!</em><br>⚡ Anti-auto-clicker active.</p>
+    <p><em>🔥 Streak = +1% per click, max 100% (2x multiplier)</em><br>⚡ Anti-auto-clicker active.</p>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
@@ -277,11 +341,9 @@
     let bottlerCount = 0;
     let megaTankCount = 0;
     
-    // Rebirth system (instead of prestige)
-    let rebirthTier = 0;      // 0,1,2,3
+    // Rebirth system
+    let rebirthTier = 0;
     let globalBonusPercent = 0;
-    
-    // Rebirth-exclusive upgrades
     let rebirthUpgradeBought = [false, false, false];
     let rebirthUpgradeCost = [0, 800, 5000, 25000];
     
@@ -293,7 +355,15 @@
     let bottlerCost = 220;
     let megaCost = 1200;
     
-    // ---------- ANTI AUTO-CLICKER SYSTEM ----------
+    // STREAK SYSTEM (improved look)
+    let currentStreak = 0;
+    let streakMultiplier = 1.0;
+    
+    // Leaderboard data (stores top 25 players with name + allTime)
+    let leaderboard = [];  // array of {name, score}
+    let playerName = "";
+    
+    // Anti auto-clicker
     let clickTimestamps = [];
     let isClickLocked = false;
     let clickLockTimer = null;
@@ -308,12 +378,12 @@
         if(recent.length > MAX_CLICKS_PER_SECOND) {
             if(!isClickLocked) {
                 isClickLocked = true;
-                showWarningMessage("⚠️ AUTO-CLICKER DETECTED! Click locked for 1.8s ⚠️");
+                showWarningMessage("⚠️ AUTO-CLICKER DETECTED! Locked 1.8s");
                 if(clickLockTimer) clearTimeout(clickLockTimer);
                 clickLockTimer = setTimeout(() => {
                     isClickLocked = false;
                     clickTimestamps = [];
-                    showWarningMessage("🔓 Click unlocked! Enjoy 🧃");
+                    showWarningMessage("🔓 Unlocked! Play fair");
                 }, LOCK_DURATION);
                 return false;
             }
@@ -337,20 +407,34 @@
     let music = new Audio("https://cdn.pixabay.com/audio/2022/10/16/audio_12b5f1b8a1.mp3");
     music.loop = true;
     music.volume = volume;
+    function playClickSound() { if(sfxOn && !isClickLocked) { let snd = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c1b6d4b4d4.mp3"); snd.volume = volume; snd.play().catch(e=>{}); } }
+    function playUpgradeSound() { if(sfxOn) { let snd = new Audio("https://cdn.pixabay.com/audio/2022/05/16/audio_8b6a7c8f2c.mp3"); snd.volume = volume; snd.play().catch(e=>{}); } }
+    music.play().catch(()=>{});
     
-    function playClickSound() {
-        if(!sfxOn || isClickLocked) return;
-        let snd = new Audio("https://cdn.pixabay.com/audio/2022/03/15/audio_c1b6d4b4d4.mp3");
-        snd.volume = volume;
-        snd.play().catch(e=>{});
+    // Streak logic: each click increases streak (+1), multiplier = 1 + (streak/100), max 2.0 at 100 streak
+    function updateStreakOnClick() {
+        if(currentStreak < 100) currentStreak++;
+        streakMultiplier = 1 + (currentStreak / 100);
+        if(streakMultiplier > 2.0) streakMultiplier = 2.0;
+        let streakBox = document.getElementById("streakBox");
+        streakBox.classList.add("streak-pulse");
+        setTimeout(()=> streakBox.classList.remove("streak-pulse"), 200);
     }
-    function playUpgradeSound() {
-        if(!sfxOn) return;
-        let snd = new Audio("https://cdn.pixabay.com/audio/2022/05/16/audio_8b6a7c8f2c.mp3");
-        snd.volume = volume;
-        snd.play().catch(e=>{});
+    
+    function resetStreakFromIdle() {
+        if(currentStreak > 0) {
+            currentStreak = 0;
+            streakMultiplier = 1.0;
+            showFloatingText(`💔 Streak broken! Reset to 1.0x`, window.innerWidth/2, 80);
+            updateUI();
+        }
     }
-    music.play().catch(()=>console.log("click to enable music"));
+    
+    let idleTimeout;
+    function resetIdleTimer() {
+        if(idleTimeout) clearTimeout(idleTimeout);
+        idleTimeout = setTimeout(() => resetStreakFromIdle(), 5200);
+    }
     
     function getTotalGlobalMultiplier() {
         let bonus = globalBonusPercent;
@@ -363,7 +447,7 @@
     function getFinalClickPower() {
         let base = baseClickPower;
         if(quantumActive) base += 50;
-        let total = Math.floor(base * getTotalGlobalMultiplier());
+        let total = Math.floor(base * streakMultiplier * getTotalGlobalMultiplier());
         return total < 1 ? 1 : total;
     }
     
@@ -373,123 +457,115 @@
         return auto;
     }
     
-    // COLA ICONS that change ONLY on rebirth (no background changes)
     function getColaEmoji() {
-        if(rebirthTier === 0) return "🧃";     // Juice box / classic cola
-        if(rebirthTier === 1) return "🍷";     // Galaxy cola (dark mystic)
-        if(rebirthTier === 2) return "🍾";     // Nebula cola (sparkling)
-        return "🏆";                           // Stellar cola (trophy / legendary)
+        if(rebirthTier === 0) return "🧃";
+        if(rebirthTier === 1) return "🍷";
+        if(rebirthTier === 2) return "🍾";
+        return "🏆";
     }
     
-    function getColaName() {
-        if(rebirthTier === 0) return "Classic Cola";
-        if(rebirthTier === 1) return "Galaxy Cola";
-        if(rebirthTier === 2) return "Nebula Cola";
-        return "Stellar Cola";
+    // Leaderboard: Save current player's total to localStorage and update ranking
+    function savePlayerToLeaderboard() {
+        if(!playerName) {
+            playerName = localStorage.getItem("colaPlayerName");
+            if(!playerName || playerName === "null") {
+                playerName = prompt("Enter your name for the leaderboard (max 12 chars):", "ColaMaster");
+                if(!playerName) playerName = "Guest";
+                playerName = playerName.substring(0, 12);
+                localStorage.setItem("colaPlayerName", playerName);
+            }
+        }
+        // Load existing leaderboard
+        let stored = localStorage.getItem("colaLeaderboard");
+        let board = [];
+        if(stored) {
+            try { board = JSON.parse(stored); } catch(e){ board = []; }
+        }
+        // Update or add current player
+        let existing = board.find(p => p.name === playerName);
+        if(existing) {
+            existing.score = totalAllTime;
+        } else {
+            board.push({ name: playerName, score: totalAllTime });
+        }
+        // Sort by score desc and keep top 25
+        board.sort((a,b) => b.score - a.score);
+        board = board.slice(0, 25);
+        localStorage.setItem("colaLeaderboard", JSON.stringify(board));
+        leaderboard = board;
+        renderLeaderboard();
     }
+    
+    function renderLeaderboard() {
+        let container = document.getElementById("leaderboardList");
+        if(!container) return;
+        if(leaderboard.length === 0) {
+            container.innerHTML = "<div style='text-align:center;padding:20px'>No legends yet. Be first!</div>";
+            return;
+        }
+        let html = "";
+        leaderboard.forEach((entry, idx) => {
+            let rank = idx+1;
+            let medal = rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : `#${rank}`;
+            html += `<div class="leaderboard-entry">
+                        <span class="leaderboard-rank">${medal}</span>
+                        <span class="leaderboard-name">${escapeHtml(entry.name)}</span>
+                        <span class="leaderboard-cola">${Math.floor(entry.score).toLocaleString()}</span>
+                    </div>`;
+        });
+        container.innerHTML = html;
+    }
+    
+    function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
     
     function updateUI() {
         document.getElementById("colaCount").innerText = Math.floor(cola);
         document.getElementById("allTime").innerText = Math.floor(totalAllTime);
+        document.getElementById("streakValue").innerText = currentStreak;
+        document.getElementById("streakMultiplier").innerText = streakMultiplier.toFixed(2);
         document.getElementById("prestigeLevel").innerText = rebirthTier;
         document.getElementById("prestigeBonus").innerText = globalBonusPercent;
-        
         document.getElementById("clickCost").innerText = clickCost;
         document.getElementById("quantumCost").innerText = quantumCost;
         document.getElementById("autoCost").innerText = siphonCost;
         document.getElementById("factoryCost").innerText = bottlerCost;
         document.getElementById("megaCost").innerText = megaCost;
         
-        // Show rebirth upgrades based on tier
         let divider = document.getElementById("rebirthUpgradeDivider");
         let title = document.getElementById("rebirthUpgradeTitle");
         let btn1 = document.getElementById("rebirthUpgrade1");
         let btn2 = document.getElementById("rebirthUpgrade2");
         let btn3 = document.getElementById("rebirthUpgrade3");
+        if(rebirthTier >= 1) { divider.style.display = "block"; title.style.display = "block"; btn1.style.display = "block"; btn1.disabled = rebirthUpgradeBought[1]; document.getElementById("rebirthUpgrade1Cost").innerText = rebirthUpgradeCost[1]; } else { btn1.style.display = "none"; }
+        if(rebirthTier >= 2) { btn2.style.display = "block"; btn2.disabled = rebirthUpgradeBought[2]; document.getElementById("rebirthUpgrade2Cost").innerText = rebirthUpgradeCost[2]; } else { btn2.style.display = "none"; }
+        if(rebirthTier >= 3) { btn3.style.display = "block"; btn3.disabled = rebirthUpgradeBought[3]; document.getElementById("rebirthUpgrade3Cost").innerText = rebirthUpgradeCost[3]; } else { btn3.style.display = "none"; }
         
-        if(rebirthTier >= 1) {
-            divider.style.display = "block";
-            title.style.display = "block";
-            btn1.style.display = "block";
-            btn1.disabled = rebirthUpgradeBought[1];
-            document.getElementById("rebirthUpgrade1Cost").innerText = rebirthUpgradeCost[1];
-        } else { btn1.style.display = "none"; }
-        
-        if(rebirthTier >= 2) {
-            btn2.style.display = "block";
-            btn2.disabled = rebirthUpgradeBought[2];
-            document.getElementById("rebirthUpgrade2Cost").innerText = rebirthUpgradeCost[2];
-        } else { btn2.style.display = "none"; }
-        
-        if(rebirthTier >= 3) {
-            btn3.style.display = "block";
-            btn3.disabled = rebirthUpgradeBought[3];
-            document.getElementById("rebirthUpgrade3Cost").innerText = rebirthUpgradeCost[3];
-        } else { btn3.style.display = "none"; }
-        
-        updateRebirthPanelDescription();
-        
-        // UPDATE COLA ICON (the only thing that changes visually)
-        let colaDiv = document.getElementById("cola");
-        colaDiv.innerText = getColaEmoji();
-        document.title = `${getColaName()} - ${Math.floor(cola)} cola`;
+        updateRebirthPanel();
+        document.getElementById("cola").innerText = getColaEmoji();
+        // auto-save leaderboard when total changes
+        savePlayerToLeaderboard();
     }
     
-    function updateRebirthPanelDescription() {
+    function updateRebirthPanel() {
         let descDiv = document.getElementById("rebirthDescription");
         let actionBtn = document.getElementById("rebirthActionBtn");
         let warningDiv = document.getElementById("rebirthWarning");
-        
         if(rebirthTier === 0) {
-            descDiv.innerHTML = `<span class="prestige-highlight">🌀 1st REBIRTH: GALAXY COLA</span><br>
-            ➤ Become <strong>Galaxy Cola</strong>! +30% permanent bonus!<br>
-            ➤ Unlock <strong>3 cosmic upgrades</strong> in shop!<br>
-            ➤ Cola icon changes: 🧃 → 🍷<br>
-            ➤ Requirement: 10,000 total cola<br>
-            <span style="color:#ffaa66;">⚠️ Reset all upgrades & cola, keep total & bonus!</span>`;
-            if(totalAllTime >= 10000) {
-                actionBtn.disabled = false;
-                warningDiv.innerText = "✅ Ready to Rebirth! Become Galaxy Cola (+30%)";
-            } else {
-                actionBtn.disabled = true;
-                warningDiv.innerText = `🔒 Need ${10000 - totalAllTime} more total cola.`;
-            }
-        } 
-        else if(rebirthTier === 1) {
-            descDiv.innerHTML = `<span class="prestige-highlight">🌀 2nd REBIRTH: NEBULA COLA</span><br>
-            ➤ Evolve to <strong>Nebula Cola</strong>! +30% more (total +60%)!<br>
-            ➤ Unlock <strong>Nebula-tier relics</strong>!<br>
-            ➤ Cola icon changes: 🍷 → 🍾<br>
-            ➤ Requirement: 100,000 total cola<br>`;
-            if(totalAllTime >= 100000) {
-                actionBtn.disabled = false;
-                warningDiv.innerText = "✅ Ready for Nebula Rebirth! +30% stacking.";
-            } else {
-                actionBtn.disabled = true;
-                warningDiv.innerText = `🔒 Need ${100000 - totalAllTime} more total cola.`;
-            }
-        }
-        else if(rebirthTier === 2) {
-            descDiv.innerHTML = `<span class="prestige-highlight">🌀 3rd REBIRTH: STELLAR COLA</span><br>
-            ➤ Ascend to <strong>Stellar Cola</strong>! +30% more (total +90%)!<br>
-            ➤ Unlock <strong>Eternal Crown upgrade</strong>!<br>
-            ➤ Cola icon becomes 🏆<br>
-            ➤ Requirement: 1,000,000 total cola<br>`;
-            if(totalAllTime >= 1000000) {
-                actionBtn.disabled = false;
-                warningDiv.innerText = "✅ ULTIMATE REBIRTH! Become Stellar Cola.";
-            } else {
-                actionBtn.disabled = true;
-                warningDiv.innerText = `🔒 Need ${1000000 - totalAllTime} more total cola.`;
-            }
-        }
-        else {
-            descDiv.innerHTML = `<span class="prestige-highlight">✨ COSMIC LEGEND</span><br>
-            You are <strong>Stellar Cola Master</strong>! Max rebirth reached.<br>
-            Keep buying legacy upgrades! +90% permanent bonus!`;
+            descDiv.innerHTML = `<span class="prestige-highlight">🌀 1st REBIRTH: GALAXY COLA</span><br>+30% permanent bonus!<br>🧃 → 🍷<br>Need 10,000 total cola`;
+            actionBtn.disabled = !(totalAllTime >= 10000);
+            warningDiv.innerText = totalAllTime>=10000 ? "Ready!" : `Need ${10000-totalAllTime} more`;
+        } else if(rebirthTier === 1) {
+            descDiv.innerHTML = `<span class="prestige-highlight">🌀 2nd REBIRTH: NEBULA COLA</span><br>+30% more (total +60%)<br>🍷 → 🍾<br>Need 100,000 total`;
+            actionBtn.disabled = !(totalAllTime >= 100000);
+            warningDiv.innerText = totalAllTime>=100000 ? "Ready!" : `Need ${100000-totalAllTime} more`;
+        } else if(rebirthTier === 2) {
+            descDiv.innerHTML = `<span class="prestige-highlight">🌀 3rd REBIRTH: STELLAR COLA</span><br>+30% more (total +90%)<br>🍾 → 🏆<br>Need 1,000,000 total`;
+            actionBtn.disabled = !(totalAllTime >= 1000000);
+            warningDiv.innerText = totalAllTime>=1000000 ? "Ready!" : `Need ${1000000-totalAllTime} more`;
+        } else {
+            descDiv.innerHTML = `<span class="prestige-highlight">✨ COSMIC LEGEND</span><br>Max rebirth! +90% bonus`;
             actionBtn.disabled = true;
             actionBtn.innerText = "🌟 MAXED";
-            warningDiv.innerText = "You have achieved ultimate cola form!";
         }
     }
     
@@ -499,17 +575,8 @@
         if(rebirthTier === 0 && totalAllTime >= 10000) { canRebirth = true; newTier = 1; }
         else if(rebirthTier === 1 && totalAllTime >= 100000) { canRebirth = true; newTier = 2; }
         else if(rebirthTier === 2 && totalAllTime >= 1000000) { canRebirth = true; newTier = 3; }
-        
-        if(!canRebirth) {
-            showFloatingText("❌ Rebirth requirements not met!", window.innerWidth/2, 120);
-            return;
-        }
-        
-        let newBonus = globalBonusPercent + 30;
-        let newName = (newTier === 1) ? "GALAXY COLA" : (newTier === 2) ? "NEBULA COLA" : "STELLAR COLA";
-        if(!confirm(`🌀 REBIRTH TO ${newName}?\n\n+30% permanent bonus (total +${newBonus}%).\nYou lose all cola, click upgrades, auto producers.\nBut unlock cosmic relics!\nYour cola icon will change permanently!\n\nContinue?`)) return;
-        
-        // Reset progress
+        if(!canRebirth) return;
+        if(!confirm(`REBIRTH to ${newTier===1?"GALAXY":newTier===2?"NEBULA":"STELLAR"} COLA?\n+30% bonus, reset upgrades`)) return;
         cola = 0;
         baseClickPower = 1;
         clickUpgradeLevel = 0;
@@ -522,92 +589,42 @@
         siphonCost = 30;
         bottlerCost = 220;
         megaCost = 1200;
-        
+        currentStreak = 0;
+        streakMultiplier = 1.0;
         globalBonusPercent += 30;
         rebirthTier = newTier;
-        
-        // Visual rebirth animation on cola
-        let colaElement = document.getElementById("cola");
-        colaElement.classList.add("rebirth-flash");
-        setTimeout(() => colaElement.classList.remove("rebirth-flash"), 800);
-        
+        document.getElementById("cola").classList.add("rebirth-flash");
+        setTimeout(()=> document.getElementById("cola").classList.remove("rebirth-flash"), 800);
         playUpgradeSound();
         updateUI();
         closeAllPanels();
-        showFloatingText(`🌀 REBIRTH ${newTier}: ${newName} ACHIEVED! +30% PERMANENT BONUS!`, window.innerWidth/2, 100);
+        showFloatingText(`🌀 REBIRTH ${newTier}! +30% bonus`, window.innerWidth/2, 100);
     }
     
     function buyRebirthUpgrade(tier) {
-        if(rebirthUpgradeBought[tier]) {
-            showFloatingText("Already own this relic!",0,0);
-            return;
-        }
+        if(rebirthUpgradeBought[tier]) return;
         let cost = rebirthUpgradeCost[tier];
         if(cola >= cost) {
             cola -= cost;
             rebirthUpgradeBought[tier] = true;
             playUpgradeSound();
-            let bonusText = tier===1?"+15%":tier===2?"+25%":"+50%";
-            showFloatingText(`✨ Ascended Relic acquired! ${bonusText} global bonus!`,0,0);
+            showFloatingText(`✨ Relic acquired! +${tier===1?15:tier===2?25:50}%`,0,0);
             updateUI();
-        } else {
-            showFloatingText(`❌ Need ${cost} cola!`,0,0);
-        }
+        } else showFloatingText(`❌ Need ${cost} cola`,0,0);
     }
     
-    function buyClickPower() {
-        if(cola >= clickCost) {
-            cola -= clickCost;
-            baseClickPower++;
-            clickUpgradeLevel++;
-            clickCost = Math.floor(10 + baseClickPower * 5);
-            playUpgradeSound();
-            updateUI();
-        } else showFloatingText("❌ Not enough cola!",0,0);
-    }
-    function buyQuantum() {
-        if(!quantumActive && cola >= quantumCost) {
-            cola -= quantumCost;
-            quantumActive = true;
-            playUpgradeSound();
-            updateUI();
-        } else if(quantumActive) showFloatingText("⚛️ Already owned!",0,0);
-        else showFloatingText("❌ Need cola",0,0);
-    }
-    function buySiphon() {
-        if(cola >= siphonCost) {
-            cola -= siphonCost;
-            autoSiphonCount++;
-            siphonCost = Math.floor(30 + autoSiphonCount * 10);
-            playUpgradeSound();
-            updateUI();
-        } else showFloatingText("❌ Need cola",0,0);
-    }
-    function buyBottler() {
-        if(cola >= bottlerCost) {
-            cola -= bottlerCost;
-            bottlerCount++;
-            bottlerCost = Math.floor(220 + bottlerCount * 32);
-            playUpgradeSound();
-            updateUI();
-        } else showFloatingText("❌ Need cola",0,0);
-    }
-    function buyMegaTank() {
-        if(cola >= megaCost) {
-            cola -= megaCost;
-            megaTankCount++;
-            megaCost = Math.floor(1200 + megaTankCount * 160);
-            playUpgradeSound();
-            updateUI();
-        } else showFloatingText("❌ Need cola",0,0);
-    }
+    function buyClickPower() { if(cola>=clickCost){ cola-=clickCost; baseClickPower++; clickCost=Math.floor(10+baseClickPower*5); playUpgradeSound(); updateUI(); } else showFloatingText("❌ Need cola",0,0); }
+    function buyQuantum() { if(!quantumActive && cola>=quantumCost){ cola-=quantumCost; quantumActive=true; playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); }
+    function buySiphon() { if(cola>=siphonCost){ cola-=siphonCost; autoSiphonCount++; siphonCost=Math.floor(30+autoSiphonCount*10); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); }
+    function buyBottler() { if(cola>=bottlerCost){ cola-=bottlerCost; bottlerCount++; bottlerCost=Math.floor(220+bottlerCount*32); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); }
+    function buyMegaTank() { if(cola>=megaCost){ cola-=megaCost; megaTankCount++; megaCost=Math.floor(1200+megaTankCount*160); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); }
     
     function showFloatingText(msg, x, y) {
         let f = document.createElement("div");
         f.className = "float";
         f.innerText = msg;
-        let posX = x || (window.innerWidth/2 + (Math.random() * 100 - 50));
-        let posY = y || (window.innerHeight/2 - 60 + (Math.random() * 90));
+        let posX = x || (window.innerWidth/2 + (Math.random()*100-50));
+        let posY = y || (window.innerHeight/2 - 60 + (Math.random()*90));
         f.style.left = posX + "px";
         f.style.top = posY + "px";
         document.body.appendChild(f);
@@ -615,23 +632,19 @@
     }
     
     function onColaClick(e) {
-        if(isClickLocked) {
-            showWarningMessage("⛔ Click locked by anti-cheat! Wait...");
-            return;
-        }
+        if(isClickLocked) { showWarningMessage("⛔ Locked by anti-cheat"); return; }
         if(!antiAutoClickerCheck()) return;
-        
         let gain = getFinalClickPower();
         cola += gain;
         totalAllTime += gain;
+        updateStreakOnClick();
+        resetIdleTimer();
         playClickSound();
-        
         let colaDiv = document.getElementById("cola");
         colaDiv.classList.add("click-effect");
         setTimeout(()=> colaDiv.classList.remove("click-effect"), 100);
-        
         let rect = colaDiv.getBoundingClientRect();
-        showFloatingText(`+${gain}`, rect.left+rect.width/2, rect.top+rect.height/2-25);
+        showFloatingText(`+${gain} (${streakMultiplier.toFixed(2)}x)`, rect.left+rect.width/2, rect.top+rect.height/2-25);
         updateUI();
     }
     
@@ -644,28 +657,22 @@
         }
     }, 1000);
     
-    function openPanel(id) {
-        closeAllPanels();
-        let panel = document.getElementById(id);
-        if(panel) panel.style.display = "flex";
-    }
-    function closeAllPanels() {
-        document.querySelectorAll('.panel').forEach(p => p.style.display = "none");
-    }
-    function toggleMusic() {
-        musicOn = !musicOn;
-        if(musicOn) music.play().catch(e=>{});
-        else music.pause();
-    }
+    function openPanel(id) { closeAllPanels(); document.getElementById(id).style.display = "flex"; }
+    function closeAllPanels() { document.querySelectorAll('.panel').forEach(p => p.style.display = "none"); }
+    function toggleMusic() { musicOn = !musicOn; musicOn ? music.play().catch(e=>{}) : music.pause(); }
     function toggleSFX() { sfxOn = !sfxOn; }
-    function setVolume(v) {
-        volume = v;
-        music.volume = volume;
-    }
+    function setVolume(v) { volume = v; music.volume = volume; }
     
     document.getElementById("cola").addEventListener("click", onColaClick);
     document.getElementById("volumeSlider").addEventListener("input", (e) => setVolume(parseFloat(e.target.value)));
     
+    // load leaderboard on start
+    let storedBoard = localStorage.getItem("colaLeaderboard");
+    if(storedBoard) { leaderboard = JSON.parse(storedBoard); } else { leaderboard = []; }
+    playerName = localStorage.getItem("colaPlayerName");
+    if(!playerName) { playerName = prompt("Enter your name:", "ColaMaster") || "Guest"; playerName = playerName.substring(0,12); localStorage.setItem("colaPlayerName", playerName); }
+    renderLeaderboard();
+    resetIdleTimer();
     updateUI();
 </script>
 </body>
