@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥤 COLA CLICKER | Premium Cola Edition</title>
+    <title>🥤 COLA LEGACY | Idle Clicker + Prestige</title>
     <style>
         * {
             user-select: none;
@@ -174,6 +174,7 @@
             transition: 0.1s;
         }
         .panel button:active { transform: scale(0.97); background: #5e3e2a; }
+        .panel button:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
         .close-panel { background: #7a3a28 !important; margin-top: 8px; }
         hr { border-color: #ff8c4260; margin: 8px 0; }
         .info-card {
@@ -267,19 +268,8 @@
             70% { opacity: 1; }
             100% { opacity: 0; bottom: 100px; visibility: hidden; }
         }
-        .save-toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
+        .success-toast {
             background: #2ecc71ee;
-            backdrop-filter: blur(12px);
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-weight: bold;
-            z-index: 400;
-            animation: fadeOutUp 1.5s forwards;
-            pointer-events: none;
         }
         .leaderboard-header {
             display: flex;
@@ -302,6 +292,12 @@
             color: white;
             font-family: monospace;
             text-align: center;
+        }
+        .cooldown-text {
+            font-size: 0.75rem;
+            color: #ffaa66;
+            text-align: center;
+            margin-top: 5px;
         }
     </style>
 </head>
@@ -366,13 +362,14 @@
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
-<!-- SETTINGS PANEL with ACCOUNT INFO & PLAY TIME -->
+<!-- SETTINGS PANEL with NICKNAME COOLDOWN -->
 <div id="settingsPanel" class="panel">
     <h3>🎛️ ACCOUNT & SETTINGS</h3>
     <div class="info-card">
         <div class="info-row"><span>👤 NICKNAME:</span><span id="displayName">---</span></div>
-        <input type="text" id="nicknameInput" class="nickname-edit" placeholder="Change nickname" maxlength="14">
-        <button onclick="changeNickname()" style="margin-top:6px; background:#2c5a2a;">✏️ UPDATE NAME</button>
+        <input type="text" id="nicknameInput" class="nickname-edit" placeholder="New nickname (max 14 chars)" maxlength="14">
+        <button id="changeNicknameBtn" onclick="attemptNicknameChange()" style="margin-top:6px; background:#2c5a2a;">✏️ CHANGE NAME</button>
+        <div id="cooldownDisplay" class="cooldown-text"></div>
     </div>
     <div class="info-card">
         <div class="info-row"><span>🥤 TOTAL COLA (All-Time):</span><span id="statTotal">0</span></div>
@@ -380,7 +377,6 @@
         <div class="info-row"><span>💪 PERMANENT BONUS:</span><span id="statBonus">+0%</span></div>
         <div class="info-row"><span>🔥 MAX STREAK:</span><span id="statMaxStreak">0</span></div>
         <div class="info-row"><span>⏱️ PLAY TIME:</span><span id="statPlaytime">0s</span></div>
-        <div class="info-row"><span>💾 LAST SAVE:</span><span id="lastSaveTime">-</span></div>
     </div>
     <hr>
     <button onclick="toggleMusic()">🎵 Toggle Music</button>
@@ -391,7 +387,7 @@
     <button onclick="manualSave()">💾 MANUAL SAVE GAME</button>
     <button onclick="manualReset()" style="background:#8b3a2a;">⚠️ RESET ALL PROGRESS</button>
     <hr>
-    <p><em>🔥 Streak: +1% per click, max +100% (2x multiplier)</em><br>🛡️ Anti-auto-clicker active<br>✨ Auto-saves every 30s</p>
+    <p><em>🔥 Streak: +1% per click, max +100% (2x multiplier)</em><br>🛡️ Anti-auto-clicker active<br>✨ Auto-saves every second (silent)</p>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
@@ -400,7 +396,7 @@
 </div>
 
 <script>
-    // ========== COLA CLICKER - FULL PERSISTENCE ==========
+    // ========== COLA CLICKER - SILENT AUTO-SAVE + 3 DAY NICKNAME COOLDOWN ==========
     (function(){
         // DOM elements
         const colaElement = document.getElementById('colaMain');
@@ -435,11 +431,11 @@
         // Play time tracking (seconds)
         let playTimeSeconds = 0;
         let playTimeInterval = null;
-        let sessionStart = Date.now();
         
-        // Leaderboard & nickname
-        let leaderboard = [];
+        // Nickname cooldown (3 days = 259200 seconds)
+        let nicknameCooldownUntil = 0; // timestamp in milliseconds
         let playerName = "";
+        let leaderboard = [];
         
         // Audio
         let musicOn = true, sfxOn = true, volume = 0.3;
@@ -456,8 +452,8 @@
         // Idle streak timer
         let idleTimer = null;
         
-        // ------------------- SAVE / LOAD (JSON) -------------------
-        function saveGame() {
+        // ------------------- SAVE / LOAD (SILENT, NO TOAST) -------------------
+        function saveGame(silent = true) {
             const saveData = {
                 cola, totalAllTime, clickPower, quantumOwned,
                 autoSiphon, factory, megaTank,
@@ -467,15 +463,18 @@
                 autoCost, factoryCost, megaCost,
                 streak, streakMulti, maxStreak,
                 playTimeSeconds,
-                version: 2
+                nicknameCooldownUntil,
+                playerName,
+                version: 3
             };
             localStorage.setItem("colaAscensionSave", JSON.stringify(saveData));
-            document.getElementById("lastSaveTime").innerText = new Date().toLocaleTimeString();
-            let toast = document.createElement("div");
-            toast.className = "save-toast";
-            toast.innerText = "💾 Game saved!";
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 1500);
+            if(!silent) {
+                let toast = document.createElement("div");
+                toast.className = "warning-toast success-toast";
+                toast.innerText = "💾 Game saved!";
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 1500);
+            }
         }
         
         function loadGame() {
@@ -493,7 +492,6 @@
                 rebirthLevel = data.rebirthLevel ?? 0;
                 permanentBonus = data.permanentBonus ?? 0;
                 if(data.relics) relics = [...data.relics];
-                else relics = [false, false, false];
                 clickUpgradeLvl = data.clickUpgradeLvl ?? 0;
                 clickCost = data.clickCost ?? 10;
                 quantumCost = data.quantumCost ?? 450;
@@ -504,17 +502,18 @@
                 streakMulti = data.streakMulti ?? 1.0;
                 maxStreak = data.maxStreak ?? 0;
                 playTimeSeconds = data.playTimeSeconds ?? 0;
+                nicknameCooldownUntil = data.nicknameCooldownUntil ?? 0;
+                playerName = data.playerName ?? "";
                 return true;
             } catch(e) { return false; }
         }
         
-        // Update play time every second
+        // Play time tracking
         function startPlayTimeTracking() {
             if(playTimeInterval) clearInterval(playTimeInterval);
             playTimeInterval = setInterval(() => {
                 playTimeSeconds++;
                 updateStatsPanel();
-                saveGame();
             }, 1000);
         }
         
@@ -527,7 +526,60 @@
             return `${seconds}s`;
         }
         
-        // Update streak and track max
+        // Nickname cooldown logic (3 days)
+        function getRemainingCooldownText() {
+            const now = Date.now();
+            if (nicknameCooldownUntil <= now) return null;
+            const remainingMs = nicknameCooldownUntil - now;
+            const days = Math.floor(remainingMs / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((remainingMs % (86400000)) / (1000 * 60 * 60));
+            if (days > 0) return `${days}d ${hours}h cooldown remaining`;
+            if (hours > 0) return `${hours}h cooldown remaining`;
+            const minutes = Math.floor(remainingMs / (1000 * 60));
+            return `${minutes}m cooldown remaining`;
+        }
+        
+        function attemptNicknameChange() {
+            const input = document.getElementById("nicknameInput");
+            const newName = input.value.trim();
+            if (!newName) {
+                showFloatingText("❌ Enter a nickname!", 0, 0);
+                return;
+            }
+            const now = Date.now();
+            if (nicknameCooldownUntil > now) {
+                const remaining = getRemainingCooldownText();
+                showFloatingText(`⏳ Cooldown: ${remaining}`, 0, 0);
+                return;
+            }
+            // Change name
+            playerName = newName.slice(0, 14);
+            localStorage.setItem("colaPlayer", playerName);
+            // Set cooldown: 3 days from now
+            nicknameCooldownUntil = now + (3 * 24 * 60 * 60 * 1000);
+            saveGame(false);
+            updateStatsPanel();
+            saveToLeaderboard();
+            input.value = "";
+            showFloatingText(`✅ Nickname changed to ${playerName}!`, window.innerWidth/2, 100);
+            updateCooldownUI();
+        }
+        
+        function updateCooldownUI() {
+            const cooldownDiv = document.getElementById("cooldownDisplay");
+            const btn = document.getElementById("changeNicknameBtn");
+            if (!cooldownDiv) return;
+            const remaining = getRemainingCooldownText();
+            if (remaining) {
+                cooldownDiv.innerText = `⏳ ${remaining} until next name change`;
+                if(btn) btn.disabled = true;
+            } else {
+                cooldownDiv.innerText = "✅ You can change your nickname now (3 days cooldown after)";
+                if(btn) btn.disabled = false;
+            }
+        }
+        
+        // Streak functions
         function updateStreak() {
             if(streak < 100) streak++;
             streakMulti = 1 + (streak / 100);
@@ -542,7 +594,7 @@
             if(streak > 0) {
                 streak = 0;
                 streakMulti = 1.0;
-                floatingText("💔 Streak broken!", window.innerWidth/2, 100);
+                showFloatingText("💔 Streak broken!", window.innerWidth/2, 100);
                 updateUI();
             }
         }
@@ -576,7 +628,7 @@
             setTimeout(() => div.remove(), 2100);
         }
         
-        function floatingText(msg, x, y) {
+        function showFloatingText(msg, x, y) {
             let el = document.createElement("div");
             el.className = "float-text";
             el.innerText = msg;
@@ -618,17 +670,9 @@
             return "🏆";
         }
         
-        // Leaderboard & nickname
+        // Leaderboard
         function saveToLeaderboard() {
-            if(!playerName) {
-                let saved = localStorage.getItem("colaPlayer");
-                if(saved) playerName = saved;
-                else {
-                    playerName = prompt("Enter your name:", "ColaFan") || "ColaFan";
-                    playerName = playerName.slice(0, 14);
-                    localStorage.setItem("colaPlayer", playerName);
-                }
-            }
+            if(!playerName) return;
             let stored = localStorage.getItem("colaLeaderboard");
             let board = stored ? JSON.parse(stored) : [];
             let existing = board.find(p => p.name === playerName);
@@ -639,19 +683,6 @@
             localStorage.setItem("colaLeaderboard", JSON.stringify(board));
             leaderboard = board;
             renderLeaderboard();
-        }
-        
-        function changeNickname() {
-            let input = document.getElementById("nicknameInput");
-            let newName = input.value.trim();
-            if(newName.length > 0) {
-                playerName = newName.slice(0, 14);
-                localStorage.setItem("colaPlayer", playerName);
-                input.value = "";
-                saveToLeaderboard();
-                updateStatsPanel();
-                floatingText(`Name changed to ${playerName}`, window.innerWidth/2, 100);
-            }
         }
         
         function renderLeaderboard() {
@@ -677,6 +708,7 @@
             document.getElementById("statBonus").innerText = `+${permanentBonus}%`;
             document.getElementById("statMaxStreak").innerText = maxStreak;
             document.getElementById("statPlaytime").innerText = formatPlaytime(playTimeSeconds);
+            updateCooldownUI();
         }
         
         function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m]); }
@@ -744,22 +776,22 @@
             colaElement.classList.add("cola-click-anim");
             setTimeout(() => colaElement.classList.remove("cola-click-anim"), 120);
             let rect = colaElement.getBoundingClientRect();
-            floatingText(`+${gain}`, rect.left + rect.width/2, rect.top + rect.height/3);
+            showFloatingText(`+${gain}`, rect.left + rect.width/2, rect.top + rect.height/3);
             updateUI();
         }
         
         // ------------------- UPGRADES -------------------
-        window.buyClickUpgrade = function() { if(cola >= clickCost) { cola -= clickCost; clickPower++; clickCost = Math.floor(10 + clickPower * 5); playUpgradeSound(); updateUI(); } else floatingText("❌ Not enough",0,0); };
-        window.buyQuantum = function() { if(!quantumOwned && cola >= quantumCost) { cola -= quantumCost; quantumOwned = true; playUpgradeSound(); updateUI(); } else floatingText("❌ Need cola",0,0); };
-        window.buyAuto = function() { if(cola >= autoCost) { cola -= autoCost; autoSiphon++; autoCost = Math.floor(30 + autoSiphon * 11); playUpgradeSound(); updateUI(); } else floatingText("❌",0,0); };
-        window.buyFactory = function() { if(cola >= factoryCost) { cola -= factoryCost; factory++; factoryCost = Math.floor(220 + factory * 34); playUpgradeSound(); updateUI(); } else floatingText("❌",0,0); };
-        window.buyMega = function() { if(cola >= megaCost) { cola -= megaCost; megaTank++; megaCost = Math.floor(1200 + megaTank * 170); playUpgradeSound(); updateUI(); } else floatingText("❌",0,0); };
+        window.buyClickUpgrade = function() { if(cola >= clickCost) { cola -= clickCost; clickPower++; clickCost = Math.floor(10 + clickPower * 5); playUpgradeSound(); updateUI(); } else showFloatingText("❌ Not enough",0,0); };
+        window.buyQuantum = function() { if(!quantumOwned && cola >= quantumCost) { cola -= quantumCost; quantumOwned = true; playUpgradeSound(); updateUI(); } else showFloatingText("❌ Need cola",0,0); };
+        window.buyAuto = function() { if(cola >= autoCost) { cola -= autoCost; autoSiphon++; autoCost = Math.floor(30 + autoSiphon * 11); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); };
+        window.buyFactory = function() { if(cola >= factoryCost) { cola -= factoryCost; factory++; factoryCost = Math.floor(220 + factory * 34); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); };
+        window.buyMega = function() { if(cola >= megaCost) { cola -= megaCost; megaTank++; megaCost = Math.floor(1200 + megaTank * 170); playUpgradeSound(); updateUI(); } else showFloatingText("❌",0,0); };
         
         window.buyRelic = function(tier) {
             if(relics[tier]) return;
             let cost = tier===1?800: tier===2?5000:25000;
-            if(cola >= cost) { cola -= cost; relics[tier] = true; playUpgradeSound(); floatingText(`✨ Relic acquired!`,0,0); updateUI(); }
-            else floatingText(`❌ Need ${cost} cola`,0,0);
+            if(cola >= cost) { cola -= cost; relics[tier] = true; playUpgradeSound(); showFloatingText(`✨ Relic acquired!`,0,0); updateUI(); }
+            else showFloatingText(`❌ Need ${cost} cola`,0,0);
         };
         
         window.performRebirth = function() {
@@ -783,7 +815,7 @@
             playUpgradeSound();
             updateUI();
             closeAllPanels();
-            floatingText(`🌀 REBIRTH ${newTier}! +30% bonus`, window.innerWidth/2, 150);
+            showFloatingText(`🌀 REBIRTH ${newTier}! +30% bonus`, window.innerWidth/2, 150);
             restartIdleTimer();
             saveGame();
         };
@@ -793,9 +825,9 @@
         window.closeAllPanels = function() { document.querySelectorAll('.panel').forEach(p => p.style.display = "none"); };
         window.toggleMusic = function() { musicOn = !musicOn; musicOn ? music.play().catch(e=>{}) : music.pause(); };
         window.toggleSFX = function() { sfxOn = !sfxOn; };
-        window.manualSave = function() { saveGame(); };
+        window.manualSave = function() { saveGame(false); };
         window.manualReset = function() { if(confirm("RESET ALL PROGRESS?")) { localStorage.removeItem("colaAscensionSave"); location.reload(); } };
-        window.changeNickname = changeNickname;
+        window.attemptNicknameChange = attemptNicknameChange;
         
         document.getElementById("volSlider").addEventListener("input", (e) => { volume = parseFloat(e.target.value); music.volume = volume; });
         
@@ -805,21 +837,28 @@
             if(inc > 0 && !locked) { cola += inc; totalAllTime += inc; updateUI(); }
         }, 1000);
         
-        setInterval(() => saveGame(), 30000);
-        window.addEventListener("beforeunload", () => saveGame());
+        // SILENT AUTO-SAVE EVERY SECOND (no toast, no visual)
+        setInterval(() => { saveGame(true); }, 1000);
+        window.addEventListener("beforeunload", () => saveGame(true));
         
         colaElement.addEventListener("click", handleColaClick);
         
         // Load game and init
         loadGame();
         startPlayTimeTracking();
-        playerName = localStorage.getItem("colaPlayer") || "ColaFan";
-        if(!localStorage.getItem("colaPlayer")) { playerName = "ColaFan"; localStorage.setItem("colaPlayer", playerName); }
+        if(!playerName) {
+            playerName = prompt("Enter your name (max 14 chars):", "ColaFan") || "ColaFan";
+            playerName = playerName.slice(0, 14);
+            nicknameCooldownUntil = 0; // first time no cooldown
+            saveGame(false);
+        }
+        localStorage.setItem("colaPlayer", playerName);
         let storedBoard = localStorage.getItem("colaLeaderboard");
         if(storedBoard) leaderboard = JSON.parse(storedBoard);
         renderLeaderboard();
         restartIdleTimer();
         updateUI();
+        updateCooldownUI();
     })();
 </script>
 </body>
