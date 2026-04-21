@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>🥤 COLA ODYSSEY | ULTIMATE | 5 Prestige Tiers | Crit + Achievements</title>
+    <title>🥤 COLA ODYSSEY | ULTIMATE+ | New UI & Rebirth Rework</title>
     <style>
         * {
             user-select: none;
@@ -62,6 +62,7 @@
             gap: 12px;
             z-index: 100;
             pointer-events: none;
+            flex-wrap: wrap;
         }
         .stat-badge {
             background: rgba(0, 0, 0, 0.85);
@@ -75,10 +76,7 @@
             border-left: 3px solid #ffaa44;
         }
         .rebirth-badge {
-            background: rgba(0, 0, 0, 0.85);
-            backdrop-filter: blur(16px);
-            padding: 6px 18px;
-            border-radius: 80px;
+            border-left: none;
             border-right: 3px solid #c084fc;
         }
 
@@ -127,8 +125,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 440px;
-            max-width: 90vw;
+            width: 500px;
+            max-width: 92vw;
             background: #0a0a18f2;
             backdrop-filter: blur(28px);
             border-radius: 44px;
@@ -137,20 +135,21 @@
             z-index: 300;
             display: none;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
             max-height: 85vh;
             overflow-y: auto;
         }
-        .panel h3 { text-align: center; color: #ffcf9a; margin: 0 0 6px; }
+        .panel h3 { text-align: center; color: #ffcf9a; margin: 0 0 6px; font-size: 1.3rem; }
         .panel button {
             background: #2a2a3f;
             border: none;
-            padding: 10px;
+            padding: 12px;
             border-radius: 60px;
             font-weight: bold;
             color: white;
             cursor: pointer;
             transition: 0.05s;
+            font-size: 0.9rem;
         }
         .panel button:active { transform: scale(0.97); background: #4a3a5f; }
         .panel button:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
@@ -190,7 +189,6 @@
             background: linear-gradient(135deg, #ff5555, #ffaa00);
             -webkit-background-clip: text;
             background-clip: text;
-            font-size: 2rem;
         }
         @keyframes floatSmooth {
             0% { opacity: 1; transform: translateY(0px) scale(0.7); }
@@ -233,17 +231,45 @@
             100% { opacity: 0; bottom: 100px; visibility: hidden; }
         }
         .leaderboard-header { display: flex; justify-content: space-between; background: #ff8c4222; padding: 6px 12px; border-radius: 60px; margin-bottom: 6px; font-weight: bold; }
+        .nickname-card {
+            background: #1e1a2f;
+            border-radius: 32px;
+            padding: 16px;
+            text-align: center;
+            border: 1px solid #ffaa55;
+        }
+        .nickname-input-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
         .nickname-edit {
-            background: #1a1a2a;
+            background: #0a0a1a;
             border: 1px solid #ff8c42;
             border-radius: 60px;
-            padding: 8px;
-            width: 100%;
+            padding: 12px;
+            flex: 1;
             color: white;
             text-align: center;
+            font-size: 1rem;
         }
-        .cooldown-text { font-size: 0.7rem; color: #ffaa66; text-align: center; margin-top: 5px; }
+        .cooldown-text { font-size: 0.7rem; color: #ffaa66; text-align: center; margin-top: 8px; }
         .upgrade-group { margin-top: 8px; }
+        .upgrade-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .auto-upgrade-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+        .big-btn {
+            background: #2a3a3f;
+            font-size: 1rem;
+            padding: 14px;
+        }
         .achievement-item {
             background: #00000055;
             margin: 5px 0;
@@ -264,6 +290,15 @@
             font-family: monospace;
             font-size: 0.8rem;
             z-index: 100;
+        }
+        .save-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+        .save-actions button {
+            flex: 1;
+            background: #2a4a3a;
         }
     </style>
 </head>
@@ -288,18 +323,22 @@
 </div>
 <div class="income-per-sec" id="incomeDisplay">📈 +0/s</div>
 
-<!-- UPGRADES PANEL -->
+<!-- UPGRADES PANEL - Improved Layout -->
 <div id="shopPanel" class="panel">
     <h3>✨ CORE UPGRADES</h3>
-    <button id="clickUpgradeBtn" onclick="buyClickUpgrade()">🔨 +1 Base Click (Cost: <span id="clickCost">10</span>)</button>
-    <button id="quantumBtn" onclick="buyQuantum()">⚡ Quantum Core +50 (Cost: <span id="quantumCost">450</span>)</button>
-    <button id="critUpgradeBtn" onclick="buyCritUpgrade()">💥 Critical Upgrade (10% → 3x) (Cost: <span id="critCost">800</span>)</button>
+    <div class="upgrade-grid">
+        <button id="clickUpgradeBtn" onclick="buyClickUpgrade()">🔨 +1 Base Click<br><span style="font-size:0.7rem;">Cost: <span id="clickCost">10</span></span></button>
+        <button id="quantumBtn" onclick="buyQuantum()">⚡ Quantum +50<br><span style="font-size:0.7rem;">Cost: <span id="quantumCost">450</span></span></button>
+        <button id="critUpgradeBtn" onclick="buyCritUpgrade()">💥 Critical (10%→20% 5x)<br><span style="font-size:0.7rem;">Cost: <span id="critCost">800</span></span></button>
+    </div>
     <hr>
-    <h3>🏭 AUTO COLA</h3>
-    <button id="autoBtn" onclick="buyAuto()">🥤 Auto Siphon +1/s (Cost: <span id="autoCost">30</span>)</button>
-    <button id="factoryBtn" onclick="buyFactory()">🏭 Bottling +8/s (Cost: <span id="factoryCost">220</span>)</button>
-    <button id="megaBtn" onclick="buyMega()">🌀 Mega Tank +50/s (Cost: <span id="megaCost">1200</span>)</button>
-    <button id="singularityBtn" onclick="buySingularity()">🕳️ Quantum Singularity +200/s (Cost: <span id="singularityCost">8000</span>)</button>
+    <h3>🏭 AUTO COLA (BIG PRODUCTION)</h3>
+    <div class="auto-upgrade-grid">
+        <button id="autoBtn" onclick="buyAuto()" class="big-btn">🥤 Auto Siphon +1/s<br><span style="font-size:0.7rem;">Cost: <span id="autoCost">30</span></span></button>
+        <button id="factoryBtn" onclick="buyFactory()" class="big-btn">🏭 Bottling Plant +8/s<br><span style="font-size:0.7rem;">Cost: <span id="factoryCost">220</span></span></button>
+        <button id="megaBtn" onclick="buyMega()" class="big-btn">🌀 Mega Tank +50/s<br><span style="font-size:0.7rem;">Cost: <span id="megaCost">1200</span></span></button>
+        <button id="singularityBtn" onclick="buySingularity()" class="big-btn">🕳️ Quantum Singularity +200/s<br><span style="font-size:0.7rem;">Req: Rebirth 3+ | Cost: <span id="singularityCost">8000</span></span></button>
+    </div>
     
     <!-- Prestige Exclusive Upgrades -->
     <div id="prestigeUpgradesContainer">
@@ -358,13 +397,15 @@
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
 
-<!-- SETTINGS -->
+<!-- SETTINGS with NICKNAME UI -->
 <div id="settingsPanel" class="panel">
-    <h3>⚙️ ACCOUNT & SETTINGS</h3>
-    <div class="info-card">
-        <div class="info-row"><span>👤 NICKNAME:</span><span id="displayName">---</span></div>
-        <input type="text" id="nicknameInput" class="nickname-edit" placeholder="New nickname (max 14)" maxlength="14">
-        <button id="changeNameBtn" onclick="attemptNicknameChange()" style="margin-top:6px;">✏️ CHANGE NAME</button>
+    <h3>⚙️ ACCOUNT & SAVE</h3>
+    <div class="nickname-card">
+        <div class="info-row"><span>👤 CURRENT NICKNAME:</span><span id="displayName">---</span></div>
+        <div class="nickname-input-group">
+            <input type="text" id="nicknameInput" class="nickname-edit" placeholder="New legend name (max 14)" maxlength="14">
+            <button id="changeNameBtn" onclick="attemptNicknameChange()" style="margin:0;">✏️ CHANGE</button>
+        </div>
         <div id="cooldownDisplay" class="cooldown-text"></div>
     </div>
     <div class="info-card">
@@ -376,12 +417,17 @@
         <div class="info-row"><span>⏱️ PLAY TIME:</span><span id="statPlaytime">0s</span></div>
     </div>
     <hr>
+    <div class="save-actions">
+        <button onclick="manualSave()">💾 MANUAL SAVE</button>
+        <button onclick="exportSave()">📤 EXPORT</button>
+        <button onclick="importSave()">📥 IMPORT</button>
+    </div>
+    <hr>
     <button onclick="toggleMusic()">🎵 Toggle Music</button>
     <button onclick="toggleSFX()">🔊 Toggle SFX</button>
     <p>🔊 Volume</p>
     <input type="range" id="volSlider" min="0" max="1" step="0.05" value="0.3">
     <hr>
-    <button onclick="manualSave()">💾 MANUAL SAVE</button>
     <button onclick="manualReset()" style="background:#8b3a2a;">⚠️ RESET ALL</button>
     <button class="close-panel" onclick="closeAllPanels()">CLOSE</button>
 </div>
@@ -407,10 +453,8 @@
             galaxyCost: 5000, nebulaCost: 25000, stellarCost: 100000, cosmicCost: 500000, omegaCost: 2000000,
             streak: 0, streakMulti: 1.0, maxStreak: 0,
             playTimeSeconds: 0, nicknameCooldownUntil: 0, playerName: "",
-            // NEW FEATURES
             critChance: 0.1, critMulti: 3, critUpgradeBought: false, critCost: 800,
-            achievements: {},  // id -> bool
-            lastSaveTimestamp: Date.now()
+            achievements: {}, totalClicks: 0, lastSaveTimestamp: Date.now()
         };
         
         // Audio & Anti-cheat
@@ -467,7 +511,6 @@
             let gain = Math.floor(base * streakBonus * totalGlobalMult());
             if(state.omegaUpgrade) gain = Math.floor(gain * 1.5);
             
-            // Critical hit
             let isCrit = Math.random() < state.critChance;
             if(isCrit) {
                 gain = Math.floor(gain * state.critMulti);
@@ -492,7 +535,7 @@
         // Streak
         function updateStreak() {
             if(state.streak < 100) state.streak++;
-            let maxMult = 2.0 + (state.rebirthLevel * 0.2); // max 3.0 at rebirth 5
+            let maxMult = 2.0 + (state.rebirthLevel * 0.2);
             state.streakMulti = 1 + (state.streak / 100);
             if(state.streakMulti > maxMult) state.streakMulti = maxMult;
             if(state.streak > state.maxStreak) state.maxStreak = state.streak;
@@ -519,15 +562,15 @@
             return !locked;
         }
         
-        // Achievements definitions
+        // Achievements
         const achievementsList = [
             { id: "click_100", name: "Click Apprentice", desc: "100 clicks", req: () => state.totalClicks >= 100, reward: "Click Power +1", apply: () => { state.clickPower++; } },
             { id: "click_1000", name: "Click Master", desc: "1,000 clicks", req: () => state.totalClicks >= 1000, reward: "Click Power +2", apply: () => { state.clickPower += 2; } },
             { id: "total_1M", name: "Millionaire", desc: "1M total cola", req: () => state.totalAllTime >= 1000000, reward: "+10% global", apply: () => { state.permanentBonus += 10; } },
             { id: "total_10M", name: "Cola Tycoon", desc: "10M total cola", req: () => state.totalAllTime >= 10000000, reward: "+20% global", apply: () => { state.permanentBonus += 20; } },
             { id: "rebirth_1", name: "First Ascension", desc: "Rebirth Tier 1", req: () => state.rebirthLevel >= 1, reward: "Auto +2/s", apply: () => { state.autoSiphon += 2; } },
-            { id: "rebirth_5", name: "Omega God", desc: "Rebirth Tier 5", req: () => state.rebirthLevel >= 5, reward: "All future gains +50%", apply: () => { state.permanentBonus += 50; } },
-            { id: "streak_50", name: "Combo Wombo", desc: "50 streak", req: () => state.maxStreak >= 50, reward: "Streak decays slower", apply: () => { /* handled separately */ } },
+            { id: "rebirth_5", name: "Omega God", desc: "Rebirth Tier 5", req: () => state.rebirthLevel >= 5, reward: "+50% global", apply: () => { state.permanentBonus += 50; } },
+            { id: "streak_50", name: "Combo Wombo", desc: "50 streak", req: () => state.maxStreak >= 50, reward: "Streak decays slower", apply: () => {} },
             { id: "all_upgrades", name: "Perfectionist", desc: "Own all prestige upgrades", req: () => state.galaxyUpgrade && state.nebulaUpgrade && state.stellarUpgrade && state.cosmicUpgrade && state.omegaUpgrade, reward: "Permanent +100% click power", apply: () => { state.clickPower += state.clickPower; } },
             { id: "crit_king", name: "Critical King", desc: "Buy crit upgrade", req: () => state.critUpgradeBought, reward: "Crit chance +5%", apply: () => { state.critChance = Math.min(0.25, state.critChance + 0.05); } }
         ];
@@ -559,7 +602,7 @@
             }).join('');
         }
         
-        // Save/Load
+        // Save/Load with export/import
         function saveGame(silent = true) {
             state.lastSaveTimestamp = Date.now();
             try {
@@ -573,7 +616,6 @@
             if(!raw) return false;
             try {
                 const saved = JSON.parse(raw);
-                // Merge with defaults for new fields
                 const defaults = {
                     singularity: 0, singularityCost: 8000,
                     critChance: 0.1, critMulti: 3, critUpgradeBought: false, critCost: 800,
@@ -584,6 +626,38 @@
                 return true;
             } catch(e) { return false; }
         }
+        
+        window.exportSave = function() {
+            const dataStr = JSON.stringify(state);
+            const blob = new Blob([dataStr], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = "cola_odyssey_save.json";
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast("📁 Save exported!", false);
+        };
+        
+        window.importSave = function() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = ev => {
+                    try {
+                        const imported = JSON.parse(ev.target.result);
+                        Object.assign(state, imported);
+                        saveGame(false);
+                        location.reload();
+                    } catch(err) { showToast("❌ Invalid save file"); }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        };
         
         function startPlayTimeTracking() {
             if(playTimeInterval) clearInterval(playTimeInterval);
@@ -611,7 +685,7 @@
             saveGame(true);
         }
         
-        // Nickname & Leaderboard
+        // Nickname with cooldown
         function getRemainingCooldown() {
             const now = Date.now();
             if (state.nicknameCooldownUntil <= now) return null;
@@ -724,11 +798,10 @@
             document.getElementById("upgrade4").style.display = show4 ? "block" : "none";
             document.getElementById("prestigeDiv5").style.display = show5 ? "block" : "none";
             document.getElementById("upgrade5").style.display = show5 ? "block" : "none";
-            // Singularity requires rebirth 3
+            
             let singularityBtn = document.getElementById("singularityBtn");
             if(singularityBtn) singularityBtn.disabled = (state.rebirthLevel < 3);
             
-            // Disable already bought
             if(state.galaxyUpgrade) document.getElementById("galaxyBtn") && (document.getElementById("galaxyBtn").disabled = true);
             if(state.nebulaUpgrade) document.getElementById("nebulaBtn") && (document.getElementById("nebulaBtn").disabled = true);
             if(state.stellarUpgrade) document.getElementById("stellarBtn") && (document.getElementById("stellarBtn").disabled = true);
@@ -737,7 +810,7 @@
             if(state.quantumOwned) document.getElementById("quantumBtn") && (document.getElementById("quantumBtn").disabled = true);
             if(state.critUpgradeBought) document.getElementById("critUpgradeBtn") && (document.getElementById("critUpgradeBtn").disabled = true);
             
-            // Rebirth panel
+            // REBIRTH: now requires CURRENT COLA (not total)
             const reqs = [0, 25000, 250000, 2000000, 15000000, 100000000];
             let req = reqs[state.rebirthLevel + 1] || 0;
             let rebirthDesc = document.getElementById("rebirthDesc");
@@ -745,16 +818,16 @@
             let reqDiv = document.getElementById("rebirthReq");
             if(state.rebirthLevel < 5) {
                 let tierNames = ["", "GALAXY", "NEBULA", "STELLAR", "COSMIC", "OMEGA"];
-                rebirthDesc.innerHTML = `<strong>🌀 ${tierNames[state.rebirthLevel+1]} REBIRTH</strong><br>+50% permanent bonus<br>Requires ${req.toLocaleString()} total cola<br>Unlocks new ultra upgrades!`;
-                rebirthBtn.disabled = !(state.totalAllTime >= req);
-                reqDiv.innerText = state.totalAllTime >= req ? "✅ READY TO ASCEND!" : `Need ${(req - state.totalAllTime).toLocaleString()} more cola`;
+                rebirthDesc.innerHTML = `<strong>🌀 ${tierNames[state.rebirthLevel+1]} REBIRTH</strong><br>+50% permanent bonus<br>Requires ${req.toLocaleString()} cola in hand<br>Unlocks new ultra upgrades!`;
+                let canRebirth = (state.cola >= req);
+                rebirthBtn.disabled = !canRebirth;
+                reqDiv.innerText = canRebirth ? "✅ READY TO ASCEND!" : `Need ${(req - state.cola).toLocaleString()} more cola (you have ${Math.floor(state.cola).toLocaleString()})`;
             } else {
                 rebirthDesc.innerHTML = `<strong>✨ OMEGA LEGEND</strong><br>Maximum rebirth achieved!<br>You are the Cola God.`;
                 rebirthBtn.disabled = true;
                 rebirthBtn.innerText = "🌟 MAX LEVEL";
             }
             
-            // Income per sec display
             let ips = getAutoIncome();
             document.getElementById("incomeDisplay").innerHTML = `📈 +${ips.toLocaleString()}/s`;
             
@@ -910,15 +983,17 @@
             } else showFloatingText(`❌ Need ${state.omegaCost.toLocaleString()} cola!`, 0, 0); 
         };
         
-        // Rebirth
+        // Rebirth: uses CURRENT COLA
         window.performRebirth = function() {
             const reqs = [0, 25000, 250000, 2000000, 15000000, 100000000];
             let nextReq = reqs[state.rebirthLevel + 1];
-            if(state.rebirthLevel >= 5 || state.totalAllTime < nextReq) { showToast("❌ Cannot ascend yet!"); return; }
-            if(!confirm(`🌀 ASCEND TO TIER ${state.rebirthLevel+1}?\n+50% permanent bonus\nAll core upgrades reset, but you keep total cola & relics.\nThe journey gets HARDER!`)) return;
+            if(state.rebirthLevel >= 5 || state.cola < nextReq) { showToast("❌ Cannot ascend yet!"); return; }
+            if(!confirm(`🌀 ASCEND TO TIER ${state.rebirthLevel+1}?\n+50% permanent bonus\nAll core upgrades reset, but you keep total cola & relics.\nYou will lose ALL current cola!`)) return;
+            
+            // Consume the required cola
+            state.cola -= nextReq;
             
             // Reset core progress
-            state.cola = 0;
             state.clickPower = 1;
             state.quantumOwned = false;
             state.autoSiphon = 0;
@@ -978,7 +1053,6 @@
             if(inc > 0 && !locked) { state.cola += inc; state.totalAllTime += inc; updateUI(); checkAchievements(); }
         }, 1000);
         
-        // Silent auto-save every 5 seconds
         setInterval(() => saveGame(true), 5000);
         window.addEventListener("beforeunload", () => saveGame(true));
         
